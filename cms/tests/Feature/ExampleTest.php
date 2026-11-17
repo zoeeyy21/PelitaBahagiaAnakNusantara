@@ -1,0 +1,24 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class ExampleTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_root_redirects_guest_to_admin_login(): void
+    {
+        $this->get('/')->assertRedirect('/login');
+    }
+
+    public function test_root_sends_logged_in_admin_to_dashboard(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/')
+            ->assertRedirect('/dashboard');
+    }
+}

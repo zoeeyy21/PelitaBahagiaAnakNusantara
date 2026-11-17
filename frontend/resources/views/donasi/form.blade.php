@@ -1,0 +1,271 @@
+@extends('layouts.app')
+
+@php
+  $campaignList = $campaigns ?? [];
+  $selected     = request('campaign');
+  $presets = [
+    ['amount' => 50000,   'impact' => '1 Paket Alat Tulis Baru'],
+    ['amount' => 100000,  'impact' => 'Makanan Sehat 1 Minggu'],
+    ['amount' => 250000,  'impact' => 'Beasiswa SPP 1 Bulan'],
+    ['amount' => 500000,  'impact' => 'Seragam Lengkap 2 Anak'],
+    ['amount' => 1000000, 'impact' => 'Buku & Sudut Baca Baru'],
+    ['amount' => 2500000, 'impact' => 'Operasional Balai Edukasi'],
+  ];
+@endphp
+
+@section('content')
+
+{{-- Header --}}
+<section class="pt-20 sm:pt-28 pb-10 sm:pb-12 bg-gradient-to-b from-paper-warm to-paper text-center">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6">
+    <span class="badge-pill bg-tint-primary text-accent-primary border border-tint-primary-line text-[10px] sm:text-xs">Amal Jariyah & Kebaikan</span>
+    <h1 class="font-serif text-2xl sm:text-4xl lg:text-5xl font-bold text-ink mt-2 sm:mt-3 tracking-tight">
+      Salurkan Pelita Kebaikan Anda
+    </h1>
+    <p class="mt-2.5 sm:mt-3 text-xs sm:text-base text-ink-muted max-w-xl mx-auto px-2">
+      100% donasi dialokasikan untuk pemenuhan gizi, biaya sekolah, dan fasilitas belajar anak pelosok negeri.
+    </p>
+    <div class="mt-5">
+      <a href="{{ url('/donasi') }}" class="btn-pill btn-outline text-xs">
+        &larr; Jelajahi Program Donasi
+      </a>
+    </div>
+  </div>
+</section>
+
+{{-- Form Section --}}
+<section class="py-8 sm:py-12 bg-paper">
+  <div class="max-w-3xl mx-auto px-3.5 sm:px-6">
+    
+ <div class="bento-card p-5 sm:p-10">
+
+      {{-- Success Alert --}}
+      @if(session('success'))
+        <div class="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl bg-tint-forest border border-tint-forest-2 text-accent-forest text-xs sm:text-sm flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-forest-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+            ✓
+          </div>
+          <div>
+            <p class="font-bold">Alhamdulillah, Donasi Berhasil Diterima!</p>
+            <p class="text-[11px] sm:text-xs text-accent-forest mt-0.5">{{ session('success') }}</p>
+          </div>
+        </div>
+      @endif
+
+      {{-- Error Alert --}}
+      @if($errors->any())
+        <div class="mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm">
+          <p class="font-bold mb-1">Mohon lengkapi formulir dengan benar:</p>
+          <ul class="list-disc list-inside text-[11px] sm:text-xs space-y-1">
+            @foreach($errors->all() as $err)
+              <li>{{ $err }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
+      <form action="{{ route('donasi.store') }}" method="POST" id="donation-form" class="space-y-6 sm:space-y-8">
+        @csrf
+
+        <input type="hidden" name="frequency" value="once" />
+
+        {{-- 2. PERUNTUKAN / PROGRAM --}}
+        <div>
+          <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ink-muted mb-2.5">Peruntukan Dana</label>
+          <select name="campaign" class="input-premium !py-3.5 text-sm font-semibold cursor-pointer">
+            <option value="umum" {{ !$selected ? 'selected' : '' }}>Donasi Umum — seluruh program yayasan</option>
+            @foreach($campaignList as $c)
+              <option value="{{ $c['slug'] }}" {{ $selected === $c['slug'] ? 'selected' : '' }}>
+                {{ \Illuminate\Support\Str::limit($c['title'], 58) }}
+              </option>
+            @endforeach
+          </select>
+          <p class="text-[10px] text-ink-muted mt-1.5">Pilih program tertentu, atau biarkan umum agar disalurkan secara merata.</p>
+        </div>
+
+        {{-- 3. NOMINAL --}}
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ink-muted">Pilih Nominal</label>
+            <span class="text-[10px] sm:text-[11px] text-accent-primary font-semibold" id="impact-label">{{ $presets[0]['impact'] }}</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            @foreach($presets as $idx => $preset)
+              <button type="button" 
+                      data-amount="{{ $preset['amount'] }}" 
+                      data-impact="{{ $preset['impact'] }}"
+                      class="nominal-button p-3 sm:p-3.5 rounded-2xl border text-left transition-all min-h-[54px] {{ $idx === 0 ? 'border-primary-500 bg-tint-primary/50 shadow-warm-sm' : 'border-line bg-surface hover:border-line-strong' }}">
+                <span class="block text-xs font-bold text-ink">Rp {{ number_format($preset['amount'], 0, ',', '.') }}</span>
+                <span class="block text-[9px] sm:text-[10px] text-ink-muted mt-0.5 truncate">{{ $preset['impact'] }}</span>
+              </button>
+            @endforeach
+          </div>
+
+          <div class="mt-3 relative flex items-center">
+            <span class="absolute left-3.5 z-10 text-xs font-bold text-ink-muted select-none pointer-events-none">Rp</span>
+            <input type="hidden" name="amount" id="form-amount-raw" value="{{ (int) request('nominal', 50000) }}" />
+            <input type="text" 
+                   inputmode="numeric" 
+                   id="custom-amount-input" 
+                   value="{{ number_format((int) request('nominal', 50000), 0, ',', '.') }}" 
+                   placeholder="Nominal lainnya (Min. 10.000)" 
+                   style="padding-left: 2.75rem !important;"
+                   class="input-premium !pl-11 text-sm font-bold" />
+          </div>
+        </div>
+
+        {{-- 4. DATA DONATUR --}}
+        <div class="pt-4 border-t border-line-soft space-y-3.5">
+          <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ink-muted">Identitas Donatur</label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-ink mb-1">Nama Lengkap <span class="text-accent-primary">*</span></label>
+              <input type="text" name="name" id="donor-name" placeholder="Nama Lengkap Anda" value="{{ old('name') }}" required class="input-premium transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-ink mb-1">No. WhatsApp <span class="text-accent-primary">*</span></label>
+              <input type="tel" name="phone" placeholder="Contoh: 0812xxxxxxxx" value="{{ old('phone') }}" required
+                inputmode="numeric" pattern="[0-9]{9,15}" minlength="9" maxlength="15"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                class="input-premium" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="anon-check" class="rounded text-accent-primary focus:ring-primary-500 w-4 h-4 border-line-strong cursor-pointer">
+            <label for="anon-check" class="text-xs text-ink-muted cursor-pointer select-none">
+              Donasi sebagai <strong class="text-ink font-semibold">Hamba Allah</strong> (Nama disamarkan)
+            </label>
+          </div>
+        </div>
+
+        {{-- METODE PEMBAYARAN: Otomatis QRIS Instan --}}
+        <input type="hidden" name="payment_method" value="qris" />
+
+        {{-- SUBMIT --}}
+        <div class="pt-2">
+          <button type="submit" class="btn-pill btn-primary w-full !py-4 text-base font-bold shadow-warm-lg flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            Lanjutkan Pembayaran Donasi
+          </button>
+          
+          <div class="mt-3 flex items-center justify-center gap-3 text-[10px] sm:text-[11px] text-ink-muted flex-wrap">
+            <span class="flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-accent-forest" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+              Enkripsi SSL 256-Bit
+            </span>
+            <span>&bull;</span>
+            <span>Konfirmasi Otomatis via WA</span>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const customInput = document.getElementById('custom-amount-input');
+    const rawInput = document.getElementById('form-amount-raw');
+    const impactLabel = document.getElementById('impact-label');
+    const buttons = document.querySelectorAll('.nominal-button');
+    const anonCheck = document.getElementById('anon-check');
+    const donorName = document.getElementById('donor-name');
+
+    function formatRupiah(num) {
+      return new Intl.NumberFormat('id-ID').format(num);
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => {
+          b.classList.remove('border-primary-500', 'bg-tint-primary/50', 'shadow-warm-sm');
+          b.classList.add('border-line', 'bg-surface');
+        });
+        btn.classList.remove('border-line', 'bg-surface');
+        btn.classList.add('border-primary-500', 'bg-tint-primary/50', 'shadow-warm-sm');
+
+        const amt = parseInt(btn.getAttribute('data-amount'), 10) || 0;
+        const imp = btn.getAttribute('data-impact');
+        if (customInput) customInput.value = formatRupiah(amt);
+        if (rawInput) rawInput.value = amt;
+        if (impactLabel) impactLabel.textContent = imp;
+      });
+    });
+
+    if (customInput) {
+      customInput.addEventListener('input', () => {
+        const rawDigits = customInput.value.replace(/[^0-9]/g, '');
+        const val = parseInt(rawDigits, 10) || 0;
+
+        if (rawDigits === '') {
+          customInput.value = '';
+        } else {
+          customInput.value = formatRupiah(val);
+        }
+
+        if (rawInput) rawInput.value = val;
+
+        let matched = false;
+        buttons.forEach(b => {
+          const btnAmt = parseInt(b.getAttribute('data-amount'), 10);
+          if (btnAmt === val) {
+            b.classList.remove('border-line', 'bg-surface');
+            b.classList.add('border-primary-500', 'bg-tint-primary/50', 'shadow-warm-sm');
+            if (impactLabel) impactLabel.textContent = b.getAttribute('data-impact');
+            matched = true;
+          } else {
+            b.classList.remove('border-primary-500', 'bg-tint-primary/50', 'shadow-warm-sm');
+            b.classList.add('border-line', 'bg-surface');
+          }
+        });
+
+        if (!matched && impactLabel) {
+          impactLabel.textContent = 'Nominal Kustom Pilihan Anda';
+        }
+      });
+    }
+
+    if (anonCheck && donorName) {
+      anonCheck.addEventListener('change', () => {
+        if (anonCheck.checked) {
+          donorName.value = 'Hamba Allah';
+          donorName.readOnly = true;
+          donorName.classList.add('bg-paper-warm', 'text-ink-muted', 'cursor-not-allowed');
+        } else {
+          donorName.value = '';
+          donorName.readOnly = false;
+          donorName.classList.remove('bg-paper-warm', 'text-ink-muted', 'cursor-not-allowed');
+          donorName.focus();
+        }
+      });
+    }
+
+    // Inisialisasi Modal QRIS Langsung
+    if (window.initQrisPayment) {
+      window.initQrisPayment(
+        '#donation-form',
+        () => {
+          const raw = document.getElementById('form-amount-raw')?.value || document.getElementById('custom-amount-input')?.value || 50000;
+          return parseInt(String(raw).replace(/[^0-9]/g, ''), 10) || 50000;
+        },
+        () => {
+          const sel = document.querySelector('select[name="campaign"]');
+          return sel ? sel.options[sel.selectedIndex].text : 'Donasi Pelita Bahagia';
+        }
+      );
+    }
+  });
+</script>
+
+@include('components.qris-modal')
+
+@endsection

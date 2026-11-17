@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* Buttons */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .btn-sm {
+        @apply px-4 py-2;
+    }
+
+    .btn-primary {
+        @apply bg-primary-700 text-white shadow-md shadow-primary-700/25 hover:-translate-y-px hover:bg-primary-800 hover:shadow-lg hover:shadow-primary-700/30;
+    }
+
+    .btn-secondary {
+        @apply bg-white text-stone-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50 hover:text-stone-900 hover:ring-stone-300;
+    }
+
+    .btn-danger {
+        @apply text-red-600 hover:bg-red-50 hover:text-red-700;
+    }
+
+    .btn-danger-solid {
+        @apply bg-red-600 text-white shadow-md shadow-red-600/25 hover:bg-red-700;
+    }
+
+    .btn.is-loading {
+        @apply pointer-events-none opacity-80;
+    }
+
+    .btn.is-loading::before {
+        content: '';
+        @apply size-4 animate-spin rounded-full border-2 border-current border-r-transparent;
+    }
+
+    /* Form fields */
+    .field {
+        @apply grid gap-2;
+    }
+
+    .field-label {
+        @apply text-sm font-semibold text-stone-700;
+    }
+
+    .field-input {
+        @apply w-full rounded-xl border-stone-200 bg-white text-sm text-stone-900 shadow-sm transition duration-150 placeholder:text-stone-400 hover:border-stone-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/15;
+    }
+
+    .field-file {
+        @apply w-full cursor-pointer rounded-xl border border-dashed border-stone-300 bg-stone-50/60 p-2 text-sm text-stone-600 transition hover:border-primary-400 hover:bg-primary-50/40 file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100;
+    }
+
+    .field-hint {
+        @apply text-xs text-stone-500;
+    }
+
+    .field-error {
+        @apply text-sm text-red-600;
+    }
+
+    /* Surfaces */
+    .panel {
+        @apply rounded-3xl border border-stone-100 bg-white shadow-[0_8px_30px_rgba(120,90,60,0.08)];
+    }
+
+    .card-interactive {
+        @apply transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(120,90,60,0.14)];
+    }
+
+    .badge {
+        @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide;
+    }
+
+    .badge-active {
+        @apply bg-primary-50 text-primary-700;
+    }
+
+    .badge-muted {
+        @apply bg-stone-100 text-stone-500;
+    }
+}
+
+/* Children of .stagger fade up one after another on page load. */
+@media (prefers-reduced-motion: no-preference) {
+    .stagger > * {
+        animation: fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+
+    .stagger > *:nth-child(2) { animation-delay: 50ms; }
+    .stagger > *:nth-child(3) { animation-delay: 100ms; }
+    .stagger > *:nth-child(4) { animation-delay: 150ms; }
+    .stagger > *:nth-child(5) { animation-delay: 200ms; }
+    .stagger > *:nth-child(6) { animation-delay: 250ms; }
+    .stagger > *:nth-child(7) { animation-delay: 300ms; }
+    .stagger > *:nth-child(8) { animation-delay: 350ms; }
+    .stagger > *:nth-child(n + 9) { animation-delay: 400ms; }
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

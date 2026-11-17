@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment Variables
+.env
+.env.backup
+.env.production
+.env.*.local
+!.env.example
+
+# Database dumps / SQL files
+*.sql
+*.sqlite
+
+# Logs & Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Laravel Framework & Storage
+cms/storage/*.key
+cms/storage/logs/*
+cms/storage/framework/cache/data/*
+cms/storage/framework/sessions/*
+cms/storage/framework/views/*
+cms/public/storage
+cms/public/hot
+cms/public/build
+cms/.phpunit.result.cache
+
+# Build / Output
+dist/
+dist-ssr/
+frontend/dist/
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
