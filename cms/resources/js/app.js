@@ -185,7 +185,7 @@ function dateRange({ start = '', end = '', min = '', max = '' } = {}) {
         },
 
         isOutOfBounds(date) {
-            return date !== null && ((this.min && date < this.min) || (this.max && date > this.max));
+            return date !== null && Boolean((this.min && date < this.min) || (this.max && date > this.max));
         },
 
         boundsLabel() {
