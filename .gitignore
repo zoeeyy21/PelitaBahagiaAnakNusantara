@@ -28,13 +28,13 @@ cms/storage/framework/sessions/*
 cms/storage/framework/views/*
 cms/public/storage
 cms/public/hot
-cms/public/build
 cms/.phpunit.result.cache
 
 # Build / Output
 dist/
 dist-ssr/
 frontend/dist/
+
 
 # OS / Editor Files
 .DS_Store
