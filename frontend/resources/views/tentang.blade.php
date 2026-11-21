@@ -103,25 +103,6 @@
             {{ $site['story']['paragraph_2'] }}
           </p>
         @endif
-        <div class="pt-4 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
-          <div>
-            <span
-              class="block font-serif text-3xl sm:text-4xl font-bold text-accent-primary">{{ number_format($site['stats']['children'] ?: 1250, 0, ',', '.') }}+</span>
-            <span class="text-xs sm:text-sm text-ink-muted">Anak Terbantu</span>
-          </div>
-          <div class="w-px h-10 bg-line"></div>
-          <div>
-            <span
-              class="block font-serif text-3xl sm:text-4xl font-bold text-accent-forest">{{ $site['stats']['programs_completed'] ?: '28+' }}</span>
-            <span class="text-xs sm:text-sm text-ink-muted">Program Terlaksana</span>
-          </div>
-          <div class="w-px h-10 bg-line"></div>
-          <div>
-            <span
-              class="block font-serif text-3xl sm:text-4xl font-bold text-sun-600">{{ $site['stats']['packages_distributed'] ?: '3.500+' }}</span>
-            <span class="text-xs sm:text-sm text-ink-muted">Paket Bantuan Disalurkan</span>
-          </div>
-        </div>
       </div>
 
       {{-- Visi & Misi Terpisah di Bawah Perjalanan Awal --}}
@@ -259,17 +240,17 @@
     </div>
   </section>
 
-  {{-- Struktur Organisasi Yayasan --}}
+  {{-- Struktur Yayasan --}}
   @php
     $structImg = trim($site['structure_image'] ?? '');
     $hasStructImg = !empty($structImg);
     $structImgUrl = $hasStructImg ? cms_asset($structImg) : '';
   @endphp
-  <section class="py-16 sm:py-24 bg-paper-warm border-t border-line/60 reveal-on-scroll" id="struktur-organisasi">
+  <section class="py-16 sm:py-24 bg-paper-warm border-t border-line/60 reveal-on-scroll" id="struktur-yayasan">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
         <h2 class="font-serif text-3xl sm:text-4xl font-bold text-ink mt-3">
-          {{ $site['structure_title'] ?? 'Struktur Organisasi' }}
+          {{ $site['structure_title'] ?? 'Struktur Yayasan' }}
         </h2>
         <p class="text-sm sm:text-base text-ink-muted mt-3 leading-relaxed">
           {{ $site['structure_subtitle'] ?? 'Susunan kepengurusan dan tata kelola Yayasan Pelita Bahagia Anak Nusantara yang berdedikasi melayani dan menjalankan amanah.' }}
@@ -279,7 +260,7 @@
       @if($hasStructImg)
         <div class="bento-card p-4 sm:p-8 bg-surface shadow-warm-lg overflow-hidden">
           <div class="relative group flex flex-col items-center justify-center">
-            <img src="{{ $structImgUrl }}" alt="{{ $site['structure_title'] ?? 'Bagan Struktur Organisasi' }}"
+            <img src="{{ $structImgUrl }}" alt="{{ $site['structure_title'] ?? 'Bagan Struktur Yayasan' }}"
               class="w-full max-h-[800px] object-contain rounded-2xl mx-auto" loading="lazy" />
           </div>
 
@@ -299,9 +280,9 @@
                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <h3 class="font-serif font-bold text-xl text-ink">Bagan Struktur Organisasi</h3>
+          <h3 class="font-serif font-bold text-xl text-ink">Bagan Struktur Yayasan</h3>
           <p class="text-xs sm:text-sm text-ink-muted mt-2 max-w-md mx-auto leading-relaxed">
-            Bagan struktur organisasi dan susunan pengurus yayasan akan segera ditampilkan di sini.
+            Bagan struktur yayasan dan susunan pengurus yayasan akan segera ditampilkan di sini.
           </p>
         </div>
       @endif

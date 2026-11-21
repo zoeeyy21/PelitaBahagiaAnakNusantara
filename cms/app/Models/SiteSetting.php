@@ -119,7 +119,7 @@ class SiteSetting extends Model
     public const STRUCTURE_CACHE_KEY = 'site_settings.structure_image';
 
     /**
-     * Dapatkan path gambar bagan struktur organisasi.
+     * Dapatkan path gambar bagan struktur yayasan.
      */
     public static function structureImage(): ?string
     {
@@ -129,7 +129,7 @@ class SiteSetting extends Model
     }
 
     /**
-     * Simpan path gambar bagan struktur organisasi.
+     * Simpan path gambar bagan struktur yayasan.
      */
     public static function updateStructureImage(?string $path): void
     {

@@ -112,11 +112,50 @@
     <a href="{{ url('/donasi/'.$heroCampaign['slug']) }}"
  class="bento-card group grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
       {{-- Visual --}}
-      <div class="lg:col-span-5 relative min-h-[200px] sm:min-h-[260px] bg-gradient-to-br from-primary-500 via-primary-600 to-forest-900 overflow-hidden">
-        <div class="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white/10"></div>
-        <div class="absolute -left-8 bottom-4 w-32 h-32 rounded-full bg-sun-400/20"></div>
-        <div class="relative h-full flex flex-col justify-between p-6 sm:p-8 text-white">
-          <div class="flex flex-wrap items-center gap-2">
+      @if(!empty($heroCampaign['image']))
+        <div class="lg:col-span-5 relative min-h-[200px] sm:min-h-[260px] overflow-hidden">
+          <img src="{{ cms_asset($heroCampaign['image']) }}" alt="{{ $heroCampaign['title'] }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+          <div class="relative h-full flex flex-col justify-between p-6 sm:p-8 text-white">
+            <div class="flex flex-wrap items-center gap-2">
+              @if($heroCampaign['verified'])
+              <span class="badge-pill bg-white/20 backdrop-blur-md text-white border border-white/30 text-[10px] flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812z" clip-rule="evenodd"/></svg>
+                Terverifikasi
+              </span>
+              @endif
+            </div>
+            <div class="mt-auto">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-black/50 text-white backdrop-blur-md">
+                <svg class="w-3.5 h-3.5 text-sun-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{{ !is_null($heroCampaign['days_left']) ? 'Sisa ' . $heroCampaign['days_left'] . ' hari' : 'Program Berkelanjutan' }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      @else
+        @php
+          $heroPalettes = [
+            'pendidikan'   => 'from-[#e3a07a] to-primary-700',
+            'kesehatan'    => 'from-[#5fa58c] to-[#1d5444]',
+            'pemberdayaan' => 'from-[#ecc95c] to-[#d6a12b]',
+            'bencana'      => 'from-primary-700 via-primary-800 to-forest-900',
+          ];
+          $heroBgGradient = $heroPalettes[$heroCampaign['category'] ?? ''] ?? 'from-[#e3a07a] to-primary-700';
+        @endphp
+        <div class="lg:col-span-5 relative min-h-[200px] sm:min-h-[260px] bg-gradient-to-br {{ $heroBgGradient }} overflow-hidden flex flex-col justify-between p-6 sm:p-8 text-white">
+          {{-- Decorative bubbles persis seperti di kegiatan & CMS --}}
+          <span class="absolute -right-10 -top-20 w-56 h-56 rounded-full bg-white/15 transition duration-700 ease-out group-hover:-translate-x-2 group-hover:translate-y-1 pointer-events-none"></span>
+          <span class="absolute -bottom-20 -left-12 w-44 h-44 rounded-full bg-white/10 transition duration-700 ease-out group-hover:translate-x-2 pointer-events-none"></span>
+
+          {{-- Watermark Logo Pelita Bahagia --}}
+          <div class="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+            <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-14 sm:h-16 w-auto object-contain drop-shadow" />
+          </div>
+
+          <div class="relative z-10 flex flex-wrap items-center gap-2">
             @if($heroCampaign['verified'])
             <span class="badge-pill bg-white/20 backdrop-blur-md text-white border border-white/30 text-[10px] flex items-center gap-1">
               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812z" clip-rule="evenodd"/></svg>
@@ -124,12 +163,16 @@
             </span>
             @endif
           </div>
-          <div class="mt-auto">
-            <span class="text-[11px] font-semibold uppercase tracking-widest text-white/70">{{ !is_null($heroCampaign['days_left']) ? 'Sisa ' . $heroCampaign['days_left'] . ' hari lagi' : 'Program Berkelanjutan' }}</span>
-            <p class="font-serif text-2xl sm:text-3xl font-bold mt-1 leading-tight">Bantu Tutup Kekurangan {{ $formatRupiah($heroSisa) }}</p>
+          <div class="relative z-10 mt-auto">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-black/40 text-white backdrop-blur-md">
+              <svg class="w-3.5 h-3.5 text-sun-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{{ !is_null($heroCampaign['days_left']) ? 'Sisa ' . $heroCampaign['days_left'] . ' hari' : 'Program Berkelanjutan' }}</span>
+            </span>
           </div>
         </div>
-      </div>
+      @endif
 
       {{-- Konten --}}
       <div class="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
@@ -188,7 +231,7 @@
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
 
     <div class="flex items-center justify-between mb-5 sm:mb-7 flex-wrap gap-3">
-      <h2 class="font-serif text-lg sm:text-2xl font-bold text-ink">Semua Program</h2>
+      <h2 class="font-serif text-lg sm:text-2xl font-bold text-ink" id="programs-heading">Semua Program</h2>
       <span class="text-[11px] sm:text-xs text-ink-muted" id="result-count">{{ $totalCampaign }} program ditemukan</span>
     </div>
 
@@ -224,20 +267,25 @@
           @else
             @php
               $palettes = [
-                'pendidikan'   => 'from-primary-500 via-primary-600 to-primary-800',
-                'kesehatan'    => 'from-forest-700 via-forest-800 to-forest-950',
-                'pemberdayaan' => 'from-sun-400 via-sun-500 to-primary-600',
+                'pendidikan'   => 'from-[#e3a07a] to-primary-700',
+                'kesehatan'    => 'from-[#5fa58c] to-[#1d5444]',
+                'pemberdayaan' => 'from-[#ecc95c] to-[#d6a12b]',
                 'bencana'      => 'from-primary-700 via-primary-800 to-forest-900',
               ];
-              $palette = $palettes[$c['category']] ?? 'from-stone-600 to-stone-800';
+              $palette = $palettes[$c['category']] ?? 'from-[#e3a07a] to-primary-700';
             @endphp
             <div class="h-40 sm:h-44 bg-gradient-to-br {{ $palette }} relative overflow-hidden flex items-center justify-center text-white">
-              <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10"></div>
-              <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl font-serif font-bold">
-                {{ strtoupper(substr($c['title'], 0, 1)) }}
+              {{-- Decorative bubbles persis seperti di kegiatan & CMS --}}
+              <span class="absolute -right-10 -top-20 w-44 h-44 rounded-full bg-white/15 transition duration-700 ease-out group-hover:-translate-x-2 group-hover:translate-y-1 pointer-events-none"></span>
+              <span class="absolute -bottom-20 -left-12 w-36 h-36 rounded-full bg-white/10 transition duration-700 ease-out group-hover:translate-x-2 pointer-events-none"></span>
+
+              {{-- Watermark Logo Pelita Bahagia --}}
+              <div class="relative z-10 flex items-center justify-center opacity-25 pointer-events-none">
+                <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-10 w-auto object-contain drop-shadow" />
               </div>
-              <div class="absolute bottom-2.5 right-2.5">
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/70 text-white backdrop-blur-md">
+
+              <div class="absolute bottom-2.5 right-2.5 z-10">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-black/40 text-white backdrop-blur-md">
                   <svg class="w-3 h-3 text-sun-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -341,12 +389,11 @@
       <p class="text-xs sm:text-sm text-ink-muted mt-2.5">Empat langkah sederhana, seluruhnya dapat dipantau dan dipertanggungjawabkan.</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-5">
       @foreach([
         ['n' => '01', 't' => 'Pilih Program', 'd' => 'Telusuri program yang diverifikasi tim kami dan pilih yang paling menyentuh hatimu.', 'c' => 'primary'],
         ['n' => '02', 't' => 'Tentukan Nominal', 'd' => 'Donasi nominal apa pun, sekali atau rutin bulanan. Tidak ada potongan biaya platform.', 'c' => 'forest'],
-        ['n' => '03', 't' => 'Bayar dengan Aman', 'd' => 'QRIS, virtual account bank, maupun e-wallet. Transaksi dienkripsi dan otomatis terkonfirmasi.', 'c' => 'sun'],
-        ['n' => '04', 't' => 'Pantau Laporan', 'd' => 'Terima laporan penyaluran berkala lengkap dengan dokumentasi visual dan bukti pengeluaran.', 'c' => 'ink'],
+        ['n' => '03', 't' => 'Bayar dengan Aman', 'd' => 'Bayar dengan QRIS Transaksi dienkripsi dan otomatis terkonfirmasi.', 'c' => 'sun'],
       ] as $step)
       <div class="p-6 sm:p-7 rounded-3xl bg-paper-warm border border-line/70 hover:shadow-warm transition-all duration-300">
         <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xs mb-4
@@ -364,23 +411,6 @@
   </div>
 </section>
 
-{{-- ═══════════════ CTA ═══════════════ --}}
-<section class="py-14 sm:py-20 bg-forest-950 text-white relative overflow-hidden border-t border-forest-900">
-  <div class="absolute -right-16 top-0 w-64 h-64 rounded-full bg-forest-800/20 blur-2xl pointer-events-none"></div>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
-    <span class="badge-pill bg-forest-900/80 text-sun-300 border border-forest-800 mb-3 text-[10px] sm:text-xs">Punya Misi Sosial?</span>
-    <h2 class="font-serif text-2xl sm:text-4xl md:text-5xl font-bold leading-tight text-white">
-      Galang Dana untuk Sekitarmu di Sini
-    </h2>
-    <p class="text-forest-200/80 text-xs sm:text-base mt-3 sm:mt-4 max-w-xl mx-auto leading-relaxed px-2">
-      Kami mendampingi dari penyusunan halaman donasi, verifikasi penerima manfaat, hingga pelaporan dana secara terbuka.
-    </p>
-    <div class="mt-6 sm:mt-8 flex items-center justify-center gap-3 flex-col sm:flex-row w-full max-w-md mx-auto sm:max-w-none">
-      <a href="{{ url('/kontak') }}" class="btn-pill btn-sun font-bold text-sm shadow-warm-lg w-full sm:w-auto">Ajukan Galang Dana</a>
-      <a href="{{ url('/donasi/form') }}" class="btn-pill btn-outline-white text-sm w-full sm:w-auto">Donasi Bebas / Mandiri</a>
-    </div>
-  </div>
-</section>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -392,6 +422,8 @@
     const resultCount = document.getElementById('result-count');
     const resetFilter = document.getElementById('reset-filter');
     const chips       = document.querySelectorAll('.category-chip');
+    const featuredSection = document.getElementById('featured-section');
+    const programsHeading = document.getElementById('programs-heading');
 
     let activeCategory = 'all';
     let activeSort     = 'progress';
@@ -412,6 +444,15 @@
     const render = () => {
       const keyword = (searchInput?.value || '').trim().toLowerCase();
       let visible = 0;
+
+      // Otomatis sembunyikan kartu "Paling Butuh Bantuan Sekarang" jika sedang mengetik pencarian atau filter aktif
+      if (featuredSection) {
+        featuredSection.classList.toggle('hidden', !!keyword || activeCategory !== 'all');
+      }
+
+      if (programsHeading) {
+        programsHeading.textContent = keyword ? 'Hasil Pencarian Program' : (activeCategory === 'all' ? 'Semua Program' : 'Program Terpilih');
+      }
 
       allCards().forEach(card => {
         const matchCategory =

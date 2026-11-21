@@ -58,7 +58,7 @@
                     </label>
 
                     <div class="field border-t border-stone-100 pt-6">
-                        <span class="field-label">Bagan Struktur Organisasi</span>
+                        <span class="field-label">Bagan Struktur Yayasan</span>
                         <p class="field-hint mt-1 mb-3">Upload gambar bagan struktur kepengurusan yayasan yang tampil di halaman Tentang Kami.</p>
                         <x-image-upload name="structure_image" label="Foto Bagan Struktur" :current="$structureImage" fit="contain" zoomable removable hint="JPG, PNG, atau WEBP, maksimal 3 MB. Zoom dengan tombol +/−, Ctrl/⌘ + scroll, atau klik dua kali; seret untuk menggeser." />
                     </div>

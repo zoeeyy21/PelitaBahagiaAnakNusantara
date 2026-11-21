@@ -34,6 +34,15 @@
 
     <div class="grid gap-6 md:grid-cols-2 md:items-start">
         <label class="field">
+            <span class="field-label">Kategori Program</span>
+            <select name="category" class="field-input">
+                @foreach (\App\Models\Program::CATEGORIES as $value => $label)
+                    <option value="{{ $value }}" @selected(old('category', $program->category ?? 'pendidikan') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('category') <span class="field-error">{{ $message }}</span> @enderror
+        </label>
+        <label class="field">
             <span class="field-label">Status</span>
             <select name="status" class="field-input">
                 @foreach (\App\Models\Program::STATUS_LABELS as $value => $label)
@@ -42,6 +51,9 @@
             </select>
             @error('status') <span class="field-error">{{ $message }}</span> @enderror
         </label>
+    </div>
+
+    <div>
         <x-image-upload name="cover_image" label="Cover" :current="$program->cover_image" removable />
     </div>
 

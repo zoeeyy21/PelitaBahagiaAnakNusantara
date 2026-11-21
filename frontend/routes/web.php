@@ -78,6 +78,7 @@ function cciSite(): array
         'quote' => ['text' => '', 'author' => '', 'role' => ''],
         'story' => ['heading' => '', 'paragraph_1' => '', 'paragraph_2' => ''],
         'mission' => ['badge' => '', 'quote' => '', 'body' => ''],
+        'qris_image' => null,
     ];
 
     $data = \App\Services\CmsClient::get('site', 'site', fn () => cciData('site'), 300);
@@ -158,6 +159,7 @@ function cciCampaign(array $c): array
         'verified'      => false,
         'story'         => [],
         'image'         => null,
+        'qris_image'    => null,
         'donation_type' => $donationType,
         'min_donation'  => $minDonation,
         'packages'      => $packages,
@@ -187,18 +189,24 @@ function cciCampaigns(): array
 function cciProgram(array $p): object
 {
     return (object) array_merge([
-        'name'        => '',
-        'slug'        => '',
-        'summary'     => '',
-        'description' => '',
-        'goal'        => '',
-        'target'      => '',
-        'status'      => 'Aktif',
-        'category'    => 'Pendidikan',
-        'period'      => 'Periode 2026',
-        'image'       => null,
-        'gallery'     => [],
-    ], $p);
+        'name'             => '',
+        'slug'             => '',
+        'summary'          => '',
+        'description'      => '',
+        'goal'             => '',
+        'target'           => '',
+        'status'           => 'Aktif',
+        'category'         => 'Pendidikan',
+        'period'           => 'Periode 2026',
+        'image'            => null,
+        'gallery'          => [],
+        'accepts_donation' => false,
+        'donation_target'  => 0,
+        'collected_amount' => 0,
+        'days_left'        => null,
+    ], $p, [
+        'accepts_donation' => (bool) ($p['accepts_donation'] ?? false),
+    ]);
 }
 
 /** Normalisasi satu kegiatan → object. */
@@ -338,7 +346,7 @@ Route::get('/donasi/{slug}', function (string $slug) {
     if (! $campaign) {
         $program = collect(cciPrograms())->firstWhere('slug', $slug);
         if ($program) {
-            if (strtolower($program->status ?? 'aktif') !== 'aktif') {
+            if (strtolower($program->status ?? 'aktif') !== 'aktif' || empty($program->accepts_donation)) {
                 return redirect()->route('program.show', $slug);
             }
 
@@ -361,11 +369,10 @@ Route::get('/donasi/{slug}', function (string $slug) {
                 'urgent'       => false,
                 'verified'     => true,
                 'image'        => $program->image ?? null,
-                'story'        => array_filter([
-                    $program->summary,
+                'story'        => array_values(array_unique(array_filter([
                     strip_tags($program->description ?? ''),
                     'Setiap donasi yang Anda salurkan akan dialokasikan langsung untuk operasional dan pemenuhan kebutuhan anak-anak penerima manfaat pada program ini.',
-                ]),
+                ]))),
             ]);
         }
     }

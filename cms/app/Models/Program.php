@@ -16,9 +16,17 @@ class Program extends Model
     /** @use HasFactory<ProgramFactory> */
     use HasDateRange, HasFactory;
 
+    public const CATEGORIES = [
+        'pendidikan' => 'Pendidikan',
+        'kesehatan' => 'Kesehatan & Gizi',
+        'pemberdayaan' => 'Pemberdayaan',
+        'bencana' => 'Tanggap Bencana',
+    ];
+
     protected $fillable = [
         'title',
         'slug',
+        'category',
         'summary',
         'description',
         'goal',
@@ -36,6 +44,7 @@ class Program extends Model
 
     protected $attributes = [
         'status' => 'active',
+        'category' => 'pendidikan',
         'is_featured' => false,
         'accepts_donation' => false,
     ];

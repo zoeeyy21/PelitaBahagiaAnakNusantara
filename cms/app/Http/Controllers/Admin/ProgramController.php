@@ -124,6 +124,7 @@ class ProgramController extends Controller
         $rules = [
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('programs', 'slug')->ignore($program)],
+            'category' => ['nullable', 'string', Rule::in(array_keys(Program::CATEGORIES))],
             'description' => ['required', 'string'],
             'goal' => ['nullable', 'string', 'max:1000'],
             'beneficiaries' => ['nullable', 'string', 'max:255'],

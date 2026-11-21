@@ -25,7 +25,7 @@ Website resmi publik **Yayasan Pelita Bahagia Anak Nusantara** (`FE-PelitaBahagi
 
 Platform ini menggunakan pola arsitektur **Decoupled Monolith / Headless CMS Lite**:
 * **Frontend (`FE-PelitaBahagia`)**: Berjalan mandiri, ringan, dan cepat. Bertugas menampilkan antarmuka pengunjung, katalog program, kegiatan berita, dan formulir donasi QRIS.
-* **Backend CMS (`CMS-PelitaBahagia`)**: Berjalan di service terpisah. Menyediakan panel admin berbasis Livewire & Volt untuk mengelola program, berita kegiatan, laporan donasi, kontak yayasan, serta bagan struktur organisasi.
+* **Backend CMS (`CMS-PelitaBahagia`)**: Berjalan di service terpisah. Menyediakan panel admin berbasis Livewire & Volt untuk mengelola program, berita kegiatan, laporan donasi, kontak yayasan, serta bagan struktur yayasan.
 * **Komunikasi Data**: Terhubung via REST API (`/api/*`) dengan format JSON standar.
 
 ```
@@ -36,7 +36,7 @@ Platform ini menggunakan pola arsitektur **Decoupled Monolith / Headless CMS Lit
 │  - Beranda & Profil Yayasan          │    GET  /api/site          │  - Panel Admin Livewire / Volt       │
 │  - Program Kerja & Detail Program    │    GET  /api/programs      │  - Manajemen Program & Donasi        │
 │  - Kegiatan Terlaksana & Galeri      │    GET  /api/activities    │  - Manajemen Berita & Kegiatan       │
-│  - Galang Dana & Form Donasi QRIS    │    GET  /api/campaigns     │  - Upload Bagan Struktur Organisasi  │
+│  - Galang Dana & Form Donasi QRIS    │    GET  /api/campaigns     │  - Upload Bagan Struktur Yayasan     │
 │  - Smart Fallback: resources/data/   │    POST /api/donations     │  - Database MySQL (pelitabahagia)    │
 └──────────────────────────────────────┘                            └──────────────────────────────────────┘
 ```
@@ -182,7 +182,7 @@ Frontend berkomunikasi dengan CMS melalui controller `app/Services/CmsClient.php
 
 | Method | Endpoint | Fungsi |
 | :--- | :--- | :--- |
-| `GET` | `/api/site` | Mengambil identitas yayasan, kontak, medsos, statistik capaian, dan bagan struktur organisasi |
+| `GET` | `/api/site` | Mengambil identitas yayasan, kontak, medsos, statistik capaian, dan bagan struktur yayasan |
 | `GET` | `/api/faqs` | Mengambil daftar pertanyaan umum (FAQ) untuk halaman kontak |
 | `GET` | `/api/programs` | Mengambil seluruh katalog program bantuan |
 | `GET` | `/api/programs/{slug}` | Mengambil detail spesifik satu program berserta galeri fotonya |
@@ -198,7 +198,7 @@ Frontend berkomunikasi dengan CMS melalui controller `app/Services/CmsClient.php
 
 Karena file fisik foto diunggah dari CMS (`storage/app/public/...`), Frontend menggunakan helper global `cms_asset($path)` yang terdefinisi di `app/helpers.php`:
 * **Di Lokal:** Otomatis menghasilkan `http://127.0.0.1:8000/storage/{path}`.
-* **Di Production:** Cukup ubah `CMS_ASSET_URL` di file `.env` frontend menjadi domain CMS online Anda (misal `https://admin.pelitabahagia.org/storage`), seluruh foto program, kegiatan, dan bagan struktur organisasi akan langsung terhubung tanpa mengubah kode Blade!
+* **Di Production:** Cukup ubah `CMS_ASSET_URL` di file `.env` frontend menjadi domain CMS online Anda (misal `https://admin.pelitabahagia.org/storage`), seluruh foto program, kegiatan, dan bagan struktur yayasan akan langsung terhubung tanpa mengubah kode Blade!
 
 Contoh pemanggilan di Blade:
 ```blade
@@ -286,14 +286,14 @@ php artisan view:cache
 
 ## 7. Troubleshooting & FAQ
 
-* **T: Foto program atau struktur organisasi tidak muncul (Error 404 pada gambar)?**  
+* **T: Foto program atau struktur yayasan tidak muncul (Error 404 pada gambar)?**  
   **J:** Pastikan perintah `php artisan storage:link` sudah berhasil dijalankan di folder CMS, dan nilai `CMS_ASSET_URL` di file `.env` frontend sudah sesuai dengan URL/port CMS yang berjalan.
 
 * **T: Data yang baru saya edit di CMS belum langsung muncul di Frontend?**  
   **J:** Frontend memiliki cache performa. Di mode lokal cache berdurasi 5 detik. Di server production berdurasi 2 menit. Anda bisa menjalankan `php artisan cache:clear` di folder frontend jika ingin memaksa pembaruan data secara instan.
 
-* **T: Di mana tempat upload gambar Struktur Organisasi?**  
-  **J:** Masuk ke panel Admin CMS di menu **"Profil & Kontak"** (`/admin/contact`), scroll ke bawah ke bagian **"Bagan Struktur Organisasi"**, upload file gambar bagan, lalu simpan.
+* **T: Di mana tempat upload gambar Struktur Yayasan?**  
+  **J:** Masuk ke panel Admin CMS di menu **"Profil & Kontak"** (`/admin/contact`), scroll ke bawah ke bagian **"Bagan Struktur Yayasan"**, upload file gambar bagan, lalu simpan.
 
 ---
 

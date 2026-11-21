@@ -20,11 +20,6 @@
     <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-ink leading-tight">
       {{ $activity->title ?? 'Detail Kegiatan Lapangan' }}
     </h1>
-    @if(isset($activity->summary))
-      <p class="text-base sm:text-lg text-ink-muted mt-4 leading-relaxed font-serif italic">
-        "{{ $activity->summary }}"
-      </p>
-    @endif
   </div>
 </section>
 
@@ -40,7 +35,7 @@
       if (!empty($activity->cover)) {
           $photos[] = [
               'image' => cms_asset($activity->cover),
-              'caption' => $activity->title,
+              'caption' => '',
           ];
           $seen[$activity->cover] = true;
       }
@@ -53,7 +48,7 @@
               if ($img && !isset($seen[$img])) {
                   $photos[] = [
                       'image' => cms_asset($img),
-                      'caption' => $cap ?: $activity->title,
+                      'caption' => $cap,
                   ];
                   $seen[$img] = true;
               }
@@ -95,19 +90,14 @@
               <span>Layar Penuh</span>
             </button>
 
-            {{-- Floating Caption & Counter (Bottom Bar) --}}
-            <div class="absolute inset-x-0 bottom-0 z-20 p-4 sm:p-5 bg-gradient-to-t from-black/85 via-black/50 to-transparent pointer-events-none">
-              <div class="flex items-end justify-between gap-3">
-                <p id="slider-caption" class="text-xs sm:text-sm text-white/95 font-medium leading-relaxed line-clamp-2 max-w-2xl drop-shadow">
-                  {{ $photos[0]['caption'] ?? $activity->title }}
-                </p>
-                @if(count($photos) > 1)
-                  <span id="slider-counter" class="shrink-0 badge-pill bg-white/20 text-white border border-white/30 text-[11px] font-mono px-2.5 py-0.5 backdrop-blur-md">
-                    1 / {{ count($photos) }}
-                  </span>
-                @endif
+            {{-- Counter (Bottom Right, hanya bila foto > 1) --}}
+            @if(count($photos) > 1)
+              <div class="absolute bottom-4 right-4 z-20 pointer-events-none">
+                <span id="slider-counter" class="badge-pill bg-black/60 text-white border border-white/20 text-[11px] font-mono px-2.5 py-1 backdrop-blur-md">
+                  1 / {{ count($photos) }}
+                </span>
               </div>
-            </div>
+            @endif
           </div>
 
           {{-- Navigation Arrows (hanya muncul bila foto > 1) --}}
@@ -180,13 +170,6 @@
         </a>
       </div>
     @endif
-
-    {{-- Bottom Back Navigation --}}
-    <div class="mt-12 pt-8 border-t border-line-soft flex items-center justify-between flex-wrap gap-4">
-      <a href="{{ url('/kegiatan') }}" class="btn-pill btn-outline text-xs font-bold">
-        &larr; Berita Lainnya
-      </a>
-    </div>
 
   </div>
 </section>

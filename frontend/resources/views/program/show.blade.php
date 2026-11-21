@@ -56,7 +56,7 @@
               if ($img && !isset($seen[$img])) {
                   $photos[] = [
                       'image' => cms_asset($img),
-                      'caption' => $cap ?: $program->name,
+                      'caption' => $cap,
                   ];
                   $seen[$img] = true;
               }
@@ -69,7 +69,7 @@
               if (!empty($act->cover) && !isset($seen[$act->cover])) {
                   $photos[] = [
                       'image' => cms_asset($act->cover),
-                      'caption' => $act->title,
+                      'caption' => '',
                   ];
                   $seen[$act->cover] = true;
               }
@@ -80,7 +80,7 @@
                       if ($gImg && !isset($seen[$gImg])) {
                           $photos[] = [
                               'image' => cms_asset($gImg),
-                              'caption' => $gCap ?: $act->title,
+                              'caption' => $gCap,
                           ];
                           $seen[$gImg] = true;
                       }
@@ -124,19 +124,14 @@
               <span>Layar Penuh</span>
             </button>
 
-            {{-- Floating Caption & Counter (Bottom Bar) --}}
-            <div class="absolute inset-x-0 bottom-0 z-20 p-4 sm:p-5 bg-gradient-to-t from-black/85 via-black/50 to-transparent pointer-events-none">
-              <div class="flex items-end justify-between gap-3">
-                <p id="prog-slider-caption" class="text-xs sm:text-sm text-white/95 font-medium leading-relaxed line-clamp-2 max-w-2xl drop-shadow">
-                  {{ $photos[0]['caption'] ?? $program->name }}
-                </p>
-                @if(count($photos) > 1)
-                  <span id="prog-slider-counter" class="shrink-0 badge-pill bg-white/20 text-white border border-white/30 text-[11px] font-mono px-2.5 py-0.5 backdrop-blur-md">
-                    1 / {{ count($photos) }}
-                  </span>
-                @endif
+            {{-- Counter (Bottom Right, hanya bila foto > 1) --}}
+            @if(count($photos) > 1)
+              <div class="absolute bottom-4 right-4 z-20 pointer-events-none">
+                <span id="prog-slider-counter" class="badge-pill bg-black/60 text-white border border-white/20 text-[11px] font-mono px-2.5 py-1 backdrop-blur-md">
+                  1 / {{ count($photos) }}
+                </span>
               </div>
-            </div>
+            @endif
           </div>
 
           {{-- Navigation Arrows (hanya muncul bila foto > 1) --}}
@@ -215,7 +210,7 @@
     </div>
 
     {{-- Donation CTA Banner inside Program --}}
-    @if($isAktif)
+    @if($isAktif && !empty($program->accepts_donation))
       <div class="mt-14 p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-forest-900 to-forest-950 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-warm-lg">
         <div>
           <span class="badge-pill bg-forest-800 text-sun-300 border border-forest-700 text-[10px] mb-2">Ayo Terlibat</span>
@@ -226,25 +221,29 @@
           Donasi Sekarang &rarr;
         </a>
       </div>
+    @elseif($isAktif)
+      <div class="mt-14 p-8 sm:p-10 rounded-3xl bg-paper-warm border border-line text-ink flex flex-col sm:flex-row items-center justify-between gap-6 shadow-warm-sm">
+        <div>
+          <span class="badge-pill bg-line text-ink-muted border border-line text-[10px] mb-2">Donasi Belum Dibuka</span>
+          <h3 class="font-serif font-bold text-2xl text-ink">Donasi Belum Dibuka</h3>
+          <p class="text-xs text-ink-muted mt-1 max-w-md">Penggalangan dana untuk program ini saat ini belum dibuka untuk publik.</p>
+        </div>
+        <button type="button" disabled class="btn-pill shrink-0 !py-3.5 !px-6 text-sm font-bold bg-line text-ink-muted/60 border border-line cursor-not-allowed opacity-70" title="Donasi belum dibuka oleh admin">
+          Donasi Belum Dibuka
+        </button>
+      </div>
     @else
       <div class="mt-14 p-8 sm:p-10 rounded-3xl bg-paper-warm border border-line text-ink flex flex-col sm:flex-row items-center justify-between gap-6 shadow-warm-sm">
         <div>
-          <span class="badge-pill bg-line text-ink-muted border border-line text-[10px] mb-2">Status: Program Selesai</span>
-          <h3 class="font-serif font-bold text-2xl text-ink">Program Telah Selesai</h3>
-          <p class="text-xs text-ink-muted mt-1 max-w-md">Program ini telah selesai dilaksanakan. Dukungan donasi untuk program ini telah ditutup.</p>
+          <span class="badge-pill bg-line text-ink-muted border border-line text-[10px] mb-2">Status: Program Non-Aktif</span>
+          <h3 class="font-serif font-bold text-2xl text-ink">Program Non-Aktif</h3>
+          <p class="text-xs text-ink-muted mt-1 max-w-md">Program ini sedang berstatus non-aktif. Dukungan donasi untuk program ini tidak dibuka.</p>
         </div>
         <button type="button" disabled class="btn-pill shrink-0 !py-3.5 !px-6 text-sm font-bold bg-line text-ink-muted/60 border border-line cursor-not-allowed opacity-70">
           Donasi Ditutup
         </button>
       </div>
     @endif
-
-    {{-- Bottom Navigation --}}
-    <div class="mt-12 pt-8 border-t border-line-soft flex items-center justify-between flex-wrap gap-4">
-      <a href="{{ url('/program') }}" class="btn-pill btn-outline text-xs font-bold">
-        &larr; Lihat Seluruh Program
-      </a>
-    </div>
 
   </div>
 </section>
@@ -288,8 +287,18 @@
                 @if($act->cover)
                   <img src="{{ cms_asset($act->cover) }}" alt="{{ $act->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
                 @else
-                  <div class="w-full h-full bg-paper-warm flex items-center justify-center text-ink-light">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  @php
+                    $palettes = [
+                      'from-[#e3a07a] to-primary-700',
+                      'from-[#5fa58c] to-[#1d5444]',
+                      'from-[#ecc95c] to-[#d6a12b]',
+                    ];
+                    $bgGradient = $palettes[abs(crc32($act->slug ?? $act->title ?? '0')) % count($palettes)];
+                  @endphp
+                  <div class="w-full h-full relative overflow-hidden bg-gradient-to-b {{ $bgGradient }} flex items-center justify-center">
+                    <span class="absolute -right-8 -top-16 w-36 h-36 rounded-full bg-white/15 pointer-events-none"></span>
+                    <span class="absolute -bottom-16 -left-10 w-32 h-32 rounded-full bg-white/10 pointer-events-none"></span>
+                    <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-8 w-auto object-contain opacity-25 drop-shadow pointer-events-none" />
                   </div>
                 @endif
                 @if(!empty($act->date))

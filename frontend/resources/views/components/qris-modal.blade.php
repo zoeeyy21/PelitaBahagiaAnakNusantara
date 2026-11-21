@@ -53,6 +53,11 @@
         </div>
       </div>
 
+      @php
+        $rawQris = $campaign['qris_image'] ?? $site['qris_image'] ?? null;
+        $qrisUrl = !empty($rawQris) ? cms_asset($rawQris) : null;
+      @endphp
+
       {{-- Container Gambar QR Code --}}
       <div class="relative mx-auto w-56 sm:w-60 p-3.5 bg-white rounded-2xl border-2 border-line shadow-warm flex flex-col items-center justify-center">
         {{-- Logo QRIS & GPN di atas QR --}}
@@ -62,73 +67,83 @@
         </div>
 
         {{-- QR Code Display --}}
-        <div class="relative w-44 h-44 bg-white flex items-center justify-center" id="qris-code-container">
-          {{-- Authentic Vector QR Pattern --}}
-          <svg id="qris-svg-code" class="w-full h-full text-gray-900" viewBox="0 0 100 100" fill="currentColor">
-            <!-- Corner Finder Pattern: Top-Left -->
-            <rect x="5" y="5" width="26" height="26" fill="currentColor" rx="3"/>
-            <rect x="9" y="9" width="18" height="18" fill="white" rx="2"/>
-            <rect x="13" y="13" width="10" height="10" fill="currentColor" rx="1.5"/>
+        <div class="relative w-44 h-44 sm:w-48 sm:h-48 bg-white flex items-center justify-center overflow-hidden" id="qris-code-container">
+          @if($qrisUrl)
+            <img 
+              id="qris-real-img" 
+              src="{{ $qrisUrl }}" 
+              alt="QRIS Donasi {{ $site['name'] ?? 'Pelita Bahagia' }}" 
+              class="w-full h-full object-contain select-none"
+              loading="eager"
+            />
+          @else
+            {{-- Authentic Vector QR Pattern --}}
+            <svg id="qris-svg-code" class="w-full h-full text-gray-900" viewBox="0 0 100 100" fill="currentColor">
+              <!-- Corner Finder Pattern: Top-Left -->
+              <rect x="5" y="5" width="26" height="26" fill="currentColor" rx="3"/>
+              <rect x="9" y="9" width="18" height="18" fill="white" rx="2"/>
+              <rect x="13" y="13" width="10" height="10" fill="currentColor" rx="1.5"/>
 
-            <!-- Corner Finder Pattern: Top-Right -->
-            <rect x="69" y="5" width="26" height="26" fill="currentColor" rx="3"/>
-            <rect x="73" y="9" width="18" height="18" fill="white" rx="2"/>
-            <rect x="77" y="13" width="10" height="10" fill="currentColor" rx="1.5"/>
+              <!-- Corner Finder Pattern: Top-Right -->
+              <rect x="69" y="5" width="26" height="26" fill="currentColor" rx="3"/>
+              <rect x="73" y="9" width="18" height="18" fill="white" rx="2"/>
+              <rect x="77" y="13" width="10" height="10" fill="currentColor" rx="1.5"/>
 
-            <!-- Corner Finder Pattern: Bottom-Left -->
-            <rect x="5" y="69" width="26" height="26" fill="currentColor" rx="3"/>
-            <rect x="9" y="73" width="18" height="18" fill="white" rx="2"/>
-            <rect x="13" y="77" width="10" height="10" fill="currentColor" rx="1.5"/>
+              <!-- Corner Finder Pattern: Bottom-Left -->
+              <rect x="5" y="69" width="26" height="26" fill="currentColor" rx="3"/>
+              <rect x="9" y="73" width="18" height="18" fill="white" rx="2"/>
+              <rect x="13" y="77" width="10" height="10" fill="currentColor" rx="1.5"/>
 
-            <!-- Timing and Alignment Patterns -->
-            <rect x="35" y="9" width="4" height="4"/>
-            <rect x="43" y="9" width="4" height="4"/>
-            <rect x="51" y="9" width="4" height="4"/>
-            <rect x="59" y="9" width="4" height="4"/>
-            <rect x="9" y="35" width="4" height="4"/>
-            <rect x="9" y="43" width="4" height="4"/>
-            <rect x="9" y="51" width="4" height="4"/>
-            <rect x="9" y="59" width="4" height="4"/>
+              <!-- Timing and Alignment Patterns -->
+              <rect x="35" y="9" width="4" height="4"/>
+              <rect x="43" y="9" width="4" height="4"/>
+              <rect x="51" y="9" width="4" height="4"/>
+              <rect x="59" y="9" width="4" height="4"/>
+              <rect x="9" y="35" width="4" height="4"/>
+              <rect x="9" y="43" width="4" height="4"/>
+              <rect x="9" y="51" width="4" height="4"/>
+              <rect x="9" y="59" width="4" height="4"/>
 
-            <!-- Random Data Modules Grid -->
-            <rect x="35" y="17" width="4" height="8"/>
-            <rect x="47" y="17" width="8" height="4"/>
-            <rect x="59" y="17" width="4" height="4"/>
-            <rect x="35" y="29" width="8" height="4"/>
-            <rect x="47" y="25" width="4" height="8"/>
-            <rect x="55" y="29" width="8" height="4"/>
+              <!-- Random Data Modules Grid -->
+              <rect x="35" y="17" width="4" height="8"/>
+              <rect x="47" y="17" width="8" height="4"/>
+              <rect x="59" y="17" width="4" height="4"/>
+              <rect x="35" y="29" width="8" height="4"/>
+              <rect x="47" y="25" width="4" height="8"/>
+              <rect x="55" y="29" width="8" height="4"/>
 
-            <rect x="17" y="35" width="4" height="4"/>
-            <rect x="25" y="35" width="4" height="8"/>
-            <rect x="69" y="35" width="8" height="4"/>
-            <rect x="81" y="35" width="8" height="4"/>
-            <rect x="17" y="47" width="8" height="4"/>
-            <rect x="29" y="47" width="4" height="8"/>
-            <rect x="69" y="43" width="4" height="12"/>
-            <rect x="77" y="47" width="8" height="4"/>
-            <rect x="89" y="43" width="4" height="8"/>
+              <rect x="17" y="35" width="4" height="4"/>
+              <rect x="25" y="35" width="4" height="8"/>
+              <rect x="69" y="35" width="8" height="4"/>
+              <rect x="81" y="35" width="8" height="4"/>
+              <rect x="17" y="47" width="8" height="4"/>
+              <rect x="29" y="47" width="4" height="8"/>
+              <rect x="69" y="43" width="4" height="12"/>
+              <rect x="77" y="47" width="8" height="4"/>
+              <rect x="89" y="43" width="4" height="8"/>
 
-            <rect x="35" y="69" width="8" height="4"/>
-            <rect x="47" y="69" width="4" height="8"/>
-            <rect x="55" y="69" width="8" height="4"/>
-            <rect x="35" y="77" width="4" height="8"/>
-            <rect x="43" y="81" width="8" height="4"/>
-            <rect x="55" y="77" width="4" height="12"/>
-            <rect x="69" y="69" width="12" height="4"/>
-            <rect x="85" y="69" width="8" height="4"/>
-            <rect x="69" y="77" width="4" height="8"/>
-            <rect x="77" y="77" width="8" height="8"/>
-            <rect x="89" y="81" width="4" height="8"/>
-            <rect x="69" y="89" width="8" height="4"/>
-            <rect x="81" y="89" width="12" height="4"/>
-          </svg>
+              <rect x="35" y="69" width="8" height="4"/>
+              <rect x="47" y="69" width="4" height="8"/>
+              <rect x="55" y="69" width="8" height="4"/>
+              <rect x="35" y="77" width="4" height="8"/>
+              <rect x="43" y="81" width="8" height="4"/>
+              <rect x="55" y="77" width="4" height="12"/>
+              <rect x="69" y="69" width="12" height="4"/>
+              <rect x="85" y="69" width="8" height="4"/>
+              <rect x="69" y="77" width="4" height="8"/>
+              <rect x="77" y="77" width="8" height="8"/>
+              <rect x="89" y="81" width="4" height="8"/>
+              <rect x="69" y="89" width="8" height="4"/>
+              <rect x="81" y="89" width="12" height="4"/>
+            </svg>
 
-          {{-- Logo Center Badge --}}
-          <div class="absolute inset-0 flex items-center justify-center">
-            <div class="w-10 h-10 rounded-xl bg-white p-1 border-2 border-red-500 shadow-md flex items-center justify-center">
-              <img src="{{ asset('images/logo-icon.png') }}" alt="Pelita" class="w-full h-full object-contain" />
+            {{-- Logo Center Badge --}}
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-xl bg-white p-1 border-2 border-red-500 shadow-md flex items-center justify-center">
+                <img src="{{ asset('images/logo-icon.png') }}" alt="Pelita" class="w-full h-full object-contain" />
+              </div>
             </div>
-          </div>
+          @endif
         </div>
 
         <p class="text-[10px] text-gray-500 font-medium mt-2">
@@ -300,6 +315,27 @@ window.initQrisPayment = function(formSelector, getAmountFn, getTitleFn) {
   // Unduh Gambar QR untuk kemudahan pengguna HP
   if (downloadBtn) {
     downloadBtn.addEventListener('click', function () {
+      const realImg = document.getElementById('qris-real-img');
+      if (realImg && realImg.src) {
+        fetch(realImg.src)
+          .then(res => res.blob())
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'qris-donasi-pelita.png';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+          })
+          .catch(() => {
+            window.open(realImg.src, '_blank');
+          });
+        return;
+      }
+
       try {
         const svgEl = document.getElementById('qris-svg-code');
         if (!svgEl) return;

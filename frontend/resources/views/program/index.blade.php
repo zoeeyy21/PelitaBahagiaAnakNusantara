@@ -104,19 +104,32 @@
                   @else
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/95 dark:bg-surface/95 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 shadow-warm-sm backdrop-blur-md">
                       <span class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
-                      Selesai
+                      Non-Aktif
                     </span>
                   @endif
                 </div>
               </div>
             @else
-              <div class="h-44 sm:h-48 bg-gradient-to-tr from-forest-800 via-forest-900 to-forest-950 flex flex-col items-center justify-center text-white/50 relative p-4 text-center">
-                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white font-serif font-bold text-xl mb-2">
-                  {{ strtoupper(substr($program->name, 0, 1)) }}
+              @php
+                $progPalettes = [
+                  'from-[#e3a07a] to-primary-700',
+                  'from-[#5fa58c] to-[#1d5444]',
+                  'from-[#ecc95c] to-[#d6a12b]',
+                ];
+                $progBgGradient = $progPalettes[abs(crc32($program->slug ?? $program->name ?? '0')) % count($progPalettes)];
+              @endphp
+              <div class="h-44 sm:h-48 relative overflow-hidden bg-gradient-to-b {{ $progBgGradient }} flex items-center justify-center">
+                {{-- Decorative bubbles persis seperti di kegiatan & CMS --}}
+                <span class="absolute -right-10 -top-20 w-44 h-44 rounded-full bg-white/15 transition duration-700 ease-out group-hover:-translate-x-2 group-hover:translate-y-1 pointer-events-none"></span>
+                <span class="absolute -bottom-20 -left-12 w-36 h-36 rounded-full bg-white/10 transition duration-700 ease-out group-hover:translate-x-2 pointer-events-none"></span>
+
+                {{-- Watermark Logo Pelita Bahagia --}}
+                <div class="relative z-10 flex items-center justify-center opacity-25 pointer-events-none">
+                  <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-10 w-auto object-contain drop-shadow" />
                 </div>
-                <span class="text-xs font-serif font-medium text-white/70">{{ $program->category }}</span>
+
                 {{-- Status Badge --}}
-                <div class="absolute top-3 right-3">
+                <div class="absolute top-3 right-3 z-10">
                   @if($isAktif)
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/20 text-white border border-white/20 backdrop-blur-md">
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -125,7 +138,7 @@
                   @else
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/10 text-white/70 border border-white/10 backdrop-blur-md">
                       <span class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
-                      Selesai
+                      Non-Aktif
                     </span>
                   @endif
                 </div>
@@ -161,7 +174,7 @@
               <span>Detail Program</span>
               <span>&rarr;</span>
             </a>
-            @if($isAktif)
+            @if($isAktif && !empty($program->accepts_donation))
               <a 
                 href="{{ url('/donasi/'.$program->slug) }}" 
                 class="btn-pill btn-primary !py-1.5 !px-3.5 !text-xs font-semibold shadow-sm"
@@ -173,7 +186,7 @@
                 type="button" 
                 disabled 
                 class="btn-pill !py-1.5 !px-3.5 !text-xs font-semibold bg-line text-ink-muted/50 border border-line cursor-not-allowed opacity-60"
-                title="Program telah selesai / non-aktif"
+                title="{{ !$isAktif ? 'Program telah selesai / non-aktif' : 'Donasi untuk program ini belum dibuka' }}"
               >
                 Dukung
               </button>

@@ -49,7 +49,7 @@ class ContactSettingController extends Controller
             'instagram.regex' => 'Username Instagram hanya boleh berisi huruf, angka, titik, dan garis bawah.',
             'tiktok.regex' => 'Username TikTok hanya boleh berisi huruf, angka, titik, dan garis bawah.',
             'facebook.url' => 'Link Facebook harus berupa URL lengkap yang diawali https://.',
-            'structure_image.max' => 'Ukuran gambar struktur organisasi maksimal 3 MB.',
+            'structure_image.max' => 'Ukuran gambar struktur yayasan maksimal 3 MB.',
         ]);
 
         if ($request->hasFile('structure_image')) {

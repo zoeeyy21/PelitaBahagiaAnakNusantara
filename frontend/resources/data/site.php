@@ -81,13 +81,13 @@ return [
         'paragraph_2' => 'Dari ruang bambu itu, gerakan kecil ini tumbuh menjadi yayasan berbadan hukum yang kini menjangkau ribuan anak di berbagai pelosok nusantara. Kami percaya bahwa setiap anak, siapapun dan dimanapun dilahirkan, berhak bermimpi dan mengenyam pendidikan yang layak.',
     ],
 
-    // ── STRUKTUR ORGANISASI (halaman Tentang) ─────────────────────────────
-    // Masukkan path gambar bagan struktur organisasi di sini.
+    // ── STRUKTUR YAYASAN (halaman Tentang) ───────────────────────────────
+    // Masukkan path gambar bagan struktur yayasan di sini.
     // Simpan gambar di folder: storage/app/public/structure/
-    // Contoh: 'structure/struktur-organisasi.png' atau 'structure/bagan.jpg'
+    // Contoh: 'structure/struktur-yayasan.png' atau 'structure/bagan.jpg'
     // Jika dibiarkan kosong '', halaman Tentang akan menampilkan placeholder panduan yang rapi.
     'structure_image' => 'structure/image.png',
-    'structure_title' => 'Struktur Organisasi',
+    'structure_title' => 'Struktur Yayasan',
     'structure_subtitle' => 'Susunan kepengurusan dan tata kelola Yayasan Pelita Bahagia Anak Nusantara yang berdedikasi melayani dan menjalankan amanah.',
     'structure_caption' => 'Bagan Struktur Kepengurusan & Tata Kelola Yayasan Pelita Bahagia Anak Nusantara',
 

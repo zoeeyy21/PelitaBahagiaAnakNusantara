@@ -31,7 +31,7 @@
                                                 <x-thumbnail :path="$program->cover_image" />
                                                 <div class="min-w-0">
                                                     <p class="font-semibold text-stone-900">{{ $program->title }}</p>
-                                                    <p class="truncate text-xs text-stone-500">{{ $program->beneficiaries ?? '-' }}</p>
+                                                    <p class="truncate text-xs text-stone-500"><span class="inline-block rounded-md bg-stone-100 px-1.5 py-0.5 font-medium text-stone-600 mr-1.5">{{ \App\Models\Program::CATEGORIES[$program->category] ?? ucfirst($program->category) }}</span>{{ $program->beneficiaries ?? '-' }}</p>
                                                 </div>
                                             </div>
                                         </td>

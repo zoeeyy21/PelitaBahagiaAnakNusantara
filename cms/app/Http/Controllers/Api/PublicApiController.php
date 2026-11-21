@@ -27,6 +27,8 @@ class PublicApiController extends Controller
     {
         $contact = SiteSetting::contact();
         $metrics = ImpactMetric::query()->where('is_active', true)->orderBy('sort_order')->get();
+        $admin = \App\Models\User::query()->whereNotNull('qris_image')->first() 
+              ?? \App\Models\User::query()->first();
 
         $stats = [
             'children' => 0,
@@ -87,9 +89,13 @@ class PublicApiController extends Controller
                 'body' => 'Mengalirkan akses pendidikan layak, perbaikan gizi anak, dan pelatihan keterampilan keluarga prasejahtera.',
             ],
             'structure_image' => SiteSetting::structureImage(),
-            'structure_title' => 'Struktur Organisasi',
+            'structure_title' => 'Struktur Yayasan',
             'structure_subtitle' => 'Susunan kepengurusan dan tata kelola Yayasan Pelita Bahagia Anak Nusantara yang berdedikasi melayani dan menjalankan amanah.',
             'structure_caption' => 'Bagan Struktur Kepengurusan & Tata Kelola',
+            'qris_image' => $admin?->qris_image,
+            'bank_name' => $admin?->bank_name,
+            'bank_account_number' => $admin?->bank_account_number,
+            'bank_account_holder' => $admin?->bank_account_holder,
         ];
 
         return response()->json(['success' => true, 'data' => $data]);
@@ -101,7 +107,6 @@ class PublicApiController extends Controller
     public function programs(): JsonResponse
     {
         $programs = Program::query()
-            ->published()
             ->with(['galleryItems' => fn ($q) => $q->where('is_published', true)->orderBy('sort_order')])
             ->withCollectedAmount()
             ->latest()
@@ -117,7 +122,6 @@ class PublicApiController extends Controller
     public function program(string $slug): JsonResponse
     {
         $program = Program::query()
-            ->published()
             ->where('slug', $slug)
             ->with(['galleryItems' => fn ($q) => $q->where('is_published', true)->orderBy('sort_order')])
             ->withCollectedAmount()
@@ -372,7 +376,7 @@ class PublicApiController extends Controller
             'goal' => $p->goal ?: ($p->beneficiaries ? "Target: {$p->beneficiaries}" : 'Membantu anak-anak nusantara'),
             'target' => $p->beneficiaries ?: 'Anak-anak nusantara',
             'status' => $p->status === 'active' ? 'Aktif' : 'Non-Aktif',
-            'category' => 'Pendidikan',
+            'category' => Program::CATEGORIES[$p->category ?? ''] ?? ucfirst($p->category ?: 'Pendidikan'),
             'period' => $p->start_date ? 'Periode '.Carbon::parse($p->start_date)->format('Y') : 'Periode 2026',
             'start_date' => $p->start_date ? Carbon::parse($p->start_date)->format('Y-m-d') : null,
             'end_date' => $p->end_date ? Carbon::parse($p->end_date)->format('Y-m-d') : null,
@@ -434,19 +438,30 @@ class PublicApiController extends Controller
             $donationType = $p->allowsCustomAmount() ? 'both' : 'package';
         }
 
-        $story = array_values(array_filter([
-            $p->summary,
-            $p->goal ? 'Tujuan: '.$p->goal : null,
-            strip_tags($p->description),
-            'Setiap donasi yang Anda salurkan akan dialokasikan langsung untuk operasional dan pemenuhan kebutuhan anak-anak penerima manfaat pada program ini.',
-        ]));
+        $desc = trim(strip_tags((string) $p->description));
+
+        $storyParts = [];
+        if ($p->goal) {
+            $storyParts[] = 'Tujuan: '.$p->goal;
+        }
+
+        if ($desc !== '') {
+            $storyParts[] = $desc;
+        }
+
+        $storyParts[] = 'Setiap donasi yang Anda salurkan akan dialokasikan langsung untuk operasional dan pemenuhan kebutuhan anak-anak penerima manfaat pada program ini.';
+
+        $story = array_values(array_unique(array_filter($storyParts)));
+
+        $admin = \App\Models\User::query()->whereNotNull('qris_image')->first() 
+              ?? \App\Models\User::query()->first();
 
         return [
             'id' => $p->id,
             'slug' => $p->slug,
             'title' => $p->title,
             'summary' => $p->summary,
-            'category' => 'pendidikan',
+            'category' => $p->category ?: 'pendidikan',
             'organization' => 'Yayasan Pelita Bahagia Anak Nusantara',
             'location' => 'Pelosok Nusantara',
             'raised' => $collected,
@@ -456,6 +471,7 @@ class PublicApiController extends Controller
             'urgent' => (bool) $p->is_featured,
             'verified' => true,
             'image' => $p->cover_image,
+            'qris_image' => $admin?->qris_image,
             'donation_type' => $donationType,
             'min_donation' => (int) ($p->min_donation_amount ?: 10000),
             'packages' => $packages,

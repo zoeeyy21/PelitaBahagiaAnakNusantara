@@ -3,114 +3,78 @@
 @section('content')
 
 {{-- 1. HERO SECTION: Dramatic Split-Screen Bento Hero --}}
-<section class="relative pt-20 pb-12 sm:pt-28 sm:pb-20 overflow-hidden bg-gradient-to-b from-paper-warm via-paper-warm/90 to-paper-warm">
+<section class="relative pt-20 pb-16 sm:pt-28 sm:pb-24 overflow-hidden bg-gradient-to-b from-paper-warm via-paper-warm/90 to-paper-warm text-center">
   {{-- Background Accent Glows --}}
   <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-[400px] sm:w-[850px] h-[350px] sm:h-[600px] bg-gradient-to-tr from-primary-300/30 via-sun-300/25 to-forest-300/25 blur-3xl rounded-full pointer-events-none -z-10"></div>
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+  <style>
+    .logo-tentang {
+      height: 65px; /* Tinggi logo di HP / Mobile */
+      width: auto;
+    }
+    @media (min-width: 640px) {
+      .logo-tentang {
+        height: 100px; /* Tinggi logo di Tablet */
+      }
+    }
+    @media (min-width: 1024px) {
+      .logo-tentang {
+        height: 135px; /* Tinggi logo di Laptop / Desktop */
+      }
+    }
+  </style>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center">
     
-    {{-- Main Grid: Hero Split Layout --}}
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-      
-      {{-- Hero Left Block: Main Headline & Core Narrative (7 Cols) --}}
-      <div class="lg:col-span-7 flex flex-col justify-between space-y-6 sm:space-y-8">
-        <div>
-          <h1 class="font-serif text-3xl sm:text-5xl md:text-6xl font-bold text-ink leading-[1.12] tracking-tight">
-            Yayasan Pelita Bahagia <br/>
-            <span class="italic text-accent-primary underline decoration-sun-400 decoration-wavy decoration-2">Anak Nusantara.</span>
+    {{-- Hero Content --}}
+    <div class="flex flex-col items-center text-center space-y-6 sm:space-y-8">
+      <div>
+        <div class="flex items-center justify-center gap-4 sm:gap-6 md:gap-7">
+          <img 
+            src="{{ asset('images/logo-pelita.png') }}" 
+            alt="Logo {{ $site['name'] }}" 
+            class="logo-tentang shrink-0 drop-shadow-sm object-contain"
+          />
+          <h1
+            class="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-ink leading-[1.18] tracking-tight text-left">
+            Yayasan Pelita Bahagia <br />
+            <span class="italic text-accent-primary underline decoration-sun-400 decoration-wavy decoration-2">Anak
+              Nusantara.</span>
           </h1>
-          <p class="mt-4 sm:mt-6 text-sm sm:text-lg text-ink-muted leading-relaxed max-w-xl">
-            Membangun generasi peduli, tangguh, dan berdaya melalui fokus utama pada <strong class="text-ink font-semibold">pendidikan anak</strong> serta <strong class="text-ink font-semibold">kepedulian sosial</strong> seperti pendampingan anak yatim &amp; dhuafa dan berbagai aksi kepedulian masyarakat.
-          </p>
         </div>
-
-        {{-- Action Buttons & Trust Markers --}}
-        <div class="space-y-4 pt-2">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <a href="{{ url('/donasi') }}" class="btn-pill btn-primary text-sm shadow-warm-lg flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-              <span>Salurkan Donasi Sekarang</span>
-            </a>
-            <a href="{{ url('/program') }}" class="btn-pill btn-outline text-sm flex items-center justify-center gap-1.5">
-              <span>Lihat Program </span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </a>
-          </div>
-
-          <div class="flex items-center gap-4 text-xs text-ink-muted pt-2 flex-wrap">
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-forest-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-              100% Transparan
-            </span>
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-forest-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-              Terdaftar Kemenkumham
-            </span>
-          </div>
-        </div>
+        <p class="mt-5 sm:mt-6 text-sm sm:text-lg text-ink-muted leading-relaxed max-w-2xl mx-auto">
+          Membangun generasi peduli, tangguh, dan berdaya melalui fokus utama pada <strong class="text-ink font-semibold">pendidikan anak</strong> serta <strong class="text-ink font-semibold">kepedulian sosial</strong> seperti pendampingan anak yatim &amp; dhuafa dan berbagai aksi kepedulian masyarakat.
+        </p>
       </div>
 
-      {{-- Hero Right Block: Visual Focus Hero Bento Card (5 Cols) --}}
-      <div class="lg:col-span-5 flex flex-col gap-4">
-
-        {{-- Card 1: Dark Forest Mission Focus Container --}}
-        <div class="bento-card p-6 sm:p-8 bg-gradient-to-br from-forest-900 via-forest-950 to-forest-900 text-white flex-1 flex flex-col justify-between relative overflow-hidden shadow-warm-lg">
-          <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-forest-700/40 blur-2xl pointer-events-none"></div>
-          <div class="absolute -left-10 bottom-0 w-40 h-40 rounded-full bg-sun-400/10 blur-2xl pointer-events-none"></div>
-
-          <div class="relative z-10">
-            <div class="flex items-center justify-between mb-4">
-              <span class="badge-pill bg-forest-800/90 text-sun-300 border border-forest-700 text-[10px] sm:text-xs">
-                {{ $site['mission']['badge'] ?: 'Misi Utama 2026' }}
-              </span>
-              <span class="text-xs text-forest-200/70 font-mono">
-                {{ $site['stats']['founded_year'] ? 'Est. ' . $site['stats']['founded_year'] : 'Yayasan Resmi' }}
-              </span>
-            </div>
-
-            <h2 class="font-serif text-lg sm:text-2xl font-bold leading-snug text-white">
-              "{{ $site['mission']['quote'] ?: 'Ketika satu anak terdidik, satu generasi terselamatkan.' }}"
-            </h2>
-
-            @if($site['mission']['body'])
-              <p class="text-xs text-forest-200/80 mt-3 leading-relaxed">
-                {{ $site['mission']['body'] }}
-              </p>
-            @endif
-          </div>
-
-          <div class="relative z-10 pt-6 border-t border-forest-800/80 mt-6">
-            <div class="grid grid-cols-3 gap-2 text-center">
-              <div class="p-2.5 rounded-2xl bg-forest-900/60 border border-forest-800/60">
-                <span class="block font-serif font-bold text-lg sm:text-xl text-sun-300 leading-none">
-                  {{ number_format($site['stats']['children'] ?: 1250, 0, ',', '.') }}+
-                </span>
-                <span class="block text-[10px] text-forest-200 uppercase tracking-wider mt-1 font-medium">Anak Terbantu</span>
-              </div>
-
-              <div class="p-2.5 rounded-2xl bg-forest-900/60 border border-forest-800/60">
-                <span class="block font-serif font-bold text-lg sm:text-xl text-sun-300 leading-none">
-                  {{ $site['stats']['programs_completed'] ?: '28+' }}
-                </span>
-                <span class="block text-[10px] text-forest-200 uppercase tracking-wider mt-1 font-medium">Program Terlaksana</span>
-              </div>
-
-              <div class="p-2.5 rounded-2xl bg-forest-900/60 border border-forest-800/60">
-                <span class="block font-serif font-bold text-lg sm:text-xl text-sun-300 leading-none">
-                  {{ $site['stats']['packages_distributed'] ?: '3.500+' }}
-                </span>
-                <span class="block text-[10px] text-forest-200 uppercase tracking-wider mt-1 font-medium">Paket Bantuan</span>
-              </div>
-            </div>
-          </div>
+      {{-- Action Buttons & Trust Markers --}}
+      <div class="space-y-4 pt-2 flex flex-col items-center">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a href="{{ url('/donasi') }}" class="btn-pill btn-primary text-sm shadow-warm-lg flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span>Salurkan Donasi Sekarang</span>
+          </a>
+          <a href="{{ url('/program') }}" class="btn-pill btn-outline text-sm flex items-center justify-center gap-1.5">
+            <span>Lihat Program </span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
         </div>
 
+        <div class="flex items-center justify-center gap-6 text-xs text-ink-muted pt-2 flex-wrap">
+          <span class="flex items-center gap-1.5 font-medium">
+            <svg class="w-4 h-4 text-forest-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            100% Transparan
+          </span>
+          <span class="flex items-center gap-1.5 font-medium">
+            <svg class="w-4 h-4 text-forest-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            Terdaftar Kemenkumham
+          </span>
+        </div>
       </div>
-
     </div>
 
   </div>
@@ -189,8 +153,20 @@
                 <img src="{{ cms_asset($prog->image) }}" alt="{{ $prog->name }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"/>
               </div>
             @else
-              <div class="h-44 sm:h-48 bg-gradient-to-tr from-forest-800 to-forest-900 flex items-center justify-center p-4">
-                <img src="{{ asset('images/logo-icon.png') }}" alt="Pelita Bahagia" class="w-12 h-12 object-contain drop-shadow" />
+              @php
+                $homePalettes = [
+                  'from-[#e3a07a] to-primary-700',
+                  'from-[#5fa58c] to-[#1d5444]',
+                  'from-[#ecc95c] to-[#d6a12b]',
+                ];
+                $homeBg = $homePalettes[abs(crc32($prog->slug ?? $prog->name ?? '0')) % count($homePalettes)];
+              @endphp
+              <div class="h-44 sm:h-48 relative overflow-hidden bg-gradient-to-b {{ $homeBg }} flex items-center justify-center">
+                <span class="absolute -right-10 -top-20 w-44 h-44 rounded-full bg-white/15 transition duration-700 ease-out group-hover:-translate-x-2 group-hover:translate-y-1 pointer-events-none"></span>
+                <span class="absolute -bottom-20 -left-12 w-36 h-36 rounded-full bg-white/10 transition duration-700 ease-out group-hover:translate-x-2 pointer-events-none"></span>
+                <div class="relative z-10 flex items-center justify-center opacity-25 pointer-events-none">
+                  <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-10 w-auto object-contain drop-shadow" />
+                </div>
               </div>
             @endif
             <div class="p-5 sm:p-6">
@@ -212,12 +188,12 @@
             <a href="{{ url('/program/'.$prog->slug) }}" class="text-xs font-bold text-ink hover:text-accent-primary">
               Detail &rarr;
             </a>
-            @if($isAktif)
+            @if($isAktif && !empty($prog->accepts_donation))
               <a href="{{ url('/donasi/'.$prog->slug) }}" class="btn-pill btn-primary !py-1.5 !px-3.5 !text-xs">
                 Dukung
               </a>
             @else
-              <button type="button" disabled class="btn-pill !py-1.5 !px-3.5 !text-xs font-semibold bg-line text-ink-muted/50 border border-line cursor-not-allowed opacity-60" title="Program telah selesai / non-aktif">
+              <button type="button" disabled class="btn-pill !py-1.5 !px-3.5 !text-xs font-semibold bg-line text-ink-muted/50 border border-line cursor-not-allowed opacity-60" title="{{ !$isAktif ? 'Program telah selesai / non-aktif' : 'Donasi belum dibuka' }}">
                 Dukung
               </button>
             @endif

@@ -21,12 +21,12 @@
   ];
 
   $palettes = [
-    'pendidikan' => 'from-primary-500 via-primary-600 to-primary-800',
-    'kesehatan' => 'from-forest-700 via-forest-800 to-forest-950',
-    'pemberdayaan' => 'from-sun-400 via-sun-500 to-primary-600',
-    'bencana' => 'from-primary-700 via-primary-800 to-forest-900',
+    'pendidikan'   => 'from-[#e3a07a] to-primary-700',
+    'kesehatan'    => 'from-[#5fa58c] to-[#1d5444]',
+    'pemberdayaan' => 'from-[#ecc95c] to-[#d6a12b]',
+    'bencana'      => 'from-primary-700 via-primary-800 to-forest-900',
   ];
-  $palette = $palettes[$campaign['category']] ?? 'from-stone-600 to-stone-800';
+  $palette = $palettes[$campaign['category']] ?? 'from-[#e3a07a] to-primary-700';
 @endphp
 
 @section('content')
@@ -65,24 +65,29 @@
                 </button>
               </div>
             @else
-              <div class="h-56 sm:h-80 bg-gradient-to-br {{ $palette }} relative overflow-hidden">
-                <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-white/10"></div>
-                <div class="absolute -left-10 bottom-0 w-40 h-40 rounded-full bg-white/5"></div>
-                <div class="relative h-full flex flex-col justify-between p-6 sm:p-9 text-white">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span class="badge-pill bg-white/20 backdrop-blur-md text-white border border-white/25 text-[10px]">
-                      {{ $categories[$campaign['category']] ?? 'Umum' }}
-                    </span>
-                  </div>
-                  <div>
-                    <span class="block text-[11px] uppercase tracking-widest text-white/70">Sisa Waktu Penggalangan</span>
-                    @if(!is_null($campaign['days_left']))
-                      <span class="block font-serif text-4xl sm:text-5xl font-bold mt-1">{{ $campaign['days_left'] }}
-                        hari</span>
-                    @else
-                      <span class="block font-serif text-3xl sm:text-4xl font-bold mt-1">Tak Terbatas</span>
-                    @endif
-                  </div>
+              <div class="h-56 sm:h-80 bg-gradient-to-br {{ $palette }} relative overflow-hidden flex flex-col justify-between p-6 sm:p-9 text-white">
+                {{-- Decorative bubbles persis seperti di kegiatan & CMS --}}
+                <span class="absolute -right-12 -top-20 w-64 h-64 rounded-full bg-white/15 pointer-events-none"></span>
+                <span class="absolute -bottom-20 -left-12 w-52 h-52 rounded-full bg-white/10 pointer-events-none"></span>
+
+                {{-- Watermark Logo Pelita Bahagia --}}
+                <div class="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+                  <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-14 sm:h-16 w-auto object-contain drop-shadow" />
+                </div>
+
+                <div class="relative z-10 flex items-center gap-2 flex-wrap">
+                  <span class="badge-pill bg-white/20 backdrop-blur-md text-white border border-white/25 text-[10px]">
+                    {{ $categories[$campaign['category']] ?? 'Umum' }}
+                  </span>
+                </div>
+                <div class="relative z-10">
+                  <span class="block text-[11px] uppercase tracking-widest text-white/70">Sisa Waktu Penggalangan</span>
+                  @if(!is_null($campaign['days_left']))
+                    <span class="block font-serif text-4xl sm:text-5xl font-bold mt-1">{{ $campaign['days_left'] }}
+                      hari</span>
+                  @else
+                    <span class="block font-serif text-3xl sm:text-4xl font-bold mt-1">Tak Terbatas</span>
+                  @endif
                 </div>
               </div>
             @endif
@@ -116,10 +121,6 @@
               <h1 class="font-serif text-2xl sm:text-4xl font-bold text-ink leading-tight">
                 {{ $campaign['title'] }}
               </h1>
-              <p
-                class="mt-4 text-sm sm:text-base text-ink-muted leading-relaxed font-serif italic border-l-4 border-primary-200 pl-4">
-                "{{ $campaign['summary'] }}"
-              </p>
             </div>
           </div>
 
@@ -130,7 +131,7 @@
               Cerita Lengkap
             </h2>
             <div class="space-y-4 text-sm text-ink-muted leading-relaxed">
-              @foreach($campaign['story'] as $paragraph)
+              @foreach(array_unique($campaign['story'] ?? []) as $paragraph)
                 <p>{{ $paragraph }}</p>
               @endforeach
             </div>
@@ -147,8 +148,8 @@
               <div>
                 <p class="text-xs font-bold text-ink">Dikelola oleh {{ $campaign['organization'] }}</p>
                 <p class="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
-                  Dana disalurkan langsung kepada penerima manfaat. Setiap pengeluaran dilaporkan dengan bukti kuitansi
-                  dan dokumentasi penyaluran.
+                  Dana disalurkan langsung kepada penerima manfaat. Setiap pengeluaran dilaporkan dengan
+                  dokumentasi penyaluran.
                 </p>
               </div>
             </div>
@@ -472,12 +473,11 @@
                       class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
                 @else
-                  <div class="h-36 bg-gradient-to-br {{ $oPalette }} relative overflow-hidden">
-                    <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-white/10"></div>
-                    <div class="relative h-full flex items-center px-5">
-                      <span class="badge-pill bg-white/20 backdrop-blur-md text-white border border-white/25 text-[10px]">
-                        {{ $categories[$o['category']] ?? 'Umum' }}
-                      </span>
+                  <div class="h-36 bg-gradient-to-br {{ $oPalette }} relative overflow-hidden flex items-center justify-center text-white">
+                    <span class="absolute -right-8 -top-16 w-36 h-36 rounded-full bg-white/15 pointer-events-none"></span>
+                    <span class="absolute -bottom-16 -left-8 w-28 h-28 rounded-full bg-white/10 pointer-events-none"></span>
+                    <div class="relative z-10 flex items-center justify-center opacity-25 pointer-events-none">
+                      <img src="{{ asset('images/logo-white.png') }}" alt="" class="h-8 w-auto object-contain drop-shadow" />
                     </div>
                   </div>
                 @endif
