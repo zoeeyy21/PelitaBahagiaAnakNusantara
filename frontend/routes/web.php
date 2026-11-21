@@ -393,3 +393,11 @@ Route::get('/donasi/{slug}', function (string $slug) {
     ]);
 })->name('donasi.show');
 
+if (app()->environment('local')) {
+    Route::get('/preview-error/{code}', function (int $code) {
+        abort_unless(in_array($code, [403, 404, 419, 500]), 404);
+        return response()->view("errors.{$code}", [], $code);
+    });
+}
+
+
