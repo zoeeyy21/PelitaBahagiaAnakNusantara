@@ -4,6 +4,14 @@
  * Global helper functions for Yayasan Pelita Bahagia Frontend
  */
 
+if (! function_exists('cms_asset')) {
+    /** Helper URL untuk aset dari CMS */
+    function cms_asset(?string $path): string
+    {
+        return \App\Services\CmsClient::assetUrl($path);
+    }
+}
+
 if (! function_exists('cciData')) {
     /** Muat file data; jika belum ada atau isinya kosong, kembalikan array kosong. */
     function cciData(string $name): array

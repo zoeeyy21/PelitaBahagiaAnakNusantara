@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
-
-View::composer('*', function ($view) {
-    $view->with('site', cciSite());
-});
 
 /*
 |--------------------------------------------------------------------------

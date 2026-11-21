@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\CmsClient;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Blade::directive('cms_asset', function ($expression) {
             return "<?php echo \App\Services\CmsClient::assetUrl({$expression}); ?>";
+        });
+
+        View::composer('*', function ($view) {
+            $view->with('site', cciSite());
         });
     }
 }
