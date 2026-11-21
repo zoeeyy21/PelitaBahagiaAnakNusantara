@@ -84,8 +84,46 @@ class AdminDonationFilterTest extends TestCase
 
         $this->assertStringStartsWith("\u{FEFF}Tanggal,Donatur", $csv);
         $this->assertStringContainsString('Budi', $csv);
-        $this->assertStringContainsString('Beasiswa,150000,Lunas', $csv);
+        $this->assertStringContainsString('"2026-11-10 16:00",Budi', $csv);
+        $this->assertStringContainsString('Beasiswa,150000,', $csv);
+        $this->assertStringNotContainsString('Status', $csv);
+        $this->assertStringNotContainsString('Lunas', $csv);
         $this->assertStringNotContainsString('Siti', $csv);
+    }
+
+    public function test_list_shows_full_timestamp_in_wib_without_status(): void
+    {
+        $donation = Donation::factory()->create(['donor_name' => 'Rina', 'status' => 'paid', 'created_at' => '2026-08-05 02:07:00']);
+
+        $this->actingAs(User::factory()->create())->get('/admin/donations?start_date=2026-08-01&end_date=2026-08-31')
+            ->assertSee('5 Agu 2026, 09:07 WIB')
+            ->assertSee('1 Agu 2026')
+            ->assertDontSee('>Status<', false)
+            ->assertDontSee('Lunas');
+
+        $this->actingAs(User::factory()->create())->get("/admin/donations/{$donation->id}")
+            ->assertSee('5 Agu 2026, 09:07 WIB')
+            ->assertDontSee('Ubah Status Manual')
+            ->assertDontSee('Lunas');
+    }
+
+    public function test_date_filter_uses_wib_day_boundaries(): void
+    {
+        // 31 Okt 2026 18:00 UTC = 1 Nov 2026 01:00 WIB.
+        Donation::factory()->create(['donor_name' => 'Donatur Dini Hari', 'created_at' => '2026-10-31 18:00:00']);
+
+        $this->actingAs(User::factory()->create())->get('/admin/donations?start_date=2026-11-01&end_date=2026-11-01')
+            ->assertSee('Donatur Dini Hari');
+    }
+
+    public function test_manual_status_update_route_is_removed(): void
+    {
+        $donation = Donation::factory()->create(['status' => 'pending']);
+
+        $this->actingAs(User::factory()->create())->put("/admin/donations/{$donation->id}", ['status' => 'paid'])
+            ->assertMethodNotAllowed();
+
+        $this->assertSame('pending', $donation->refresh()->status);
     }
 
     public function test_guest_cannot_export_donations(): void

@@ -1,3 +1,10 @@
+@php
+    $programPeriods = $programs->mapWithKeys(fn ($program): array => [
+        (string) $program->id => ['min' => $program->start_date?->toDateString() ?? '', 'max' => $program->end_date?->toDateString() ?? ''],
+    ]);
+    $selectedProgramPeriod = $programPeriods->get((string) old('program_id', $activity->program_id), ['min' => '', 'max' => '']);
+@endphp
+
 <div class="grid gap-6">
     <label class="field">
         <span class="field-label">Judul</span>
@@ -10,14 +17,18 @@
     <div class="grid gap-6 md:grid-cols-2 md:items-start">
         <label class="field">
             <span class="field-label">Program Terkait</span>
-            <select name="program_id" class="field-input">
+            <select name="program_id" class="field-input"
+                x-data="{ periods: @js($programPeriods) }"
+                x-on:change="$dispatch('activity-program-period', periods[$event.target.value] ?? { min: '', max: '' })">
                 <option value="">Tidak terkait program tertentu</option>
                 @foreach ($programs as $program)
                     <option value="{{ $program->id }}" @selected((int) old('program_id', $activity->program_id) === $program->id)>{{ $program->title }}</option>
                 @endforeach
             </select>
         </label>
-        <x-date-range label="Tanggal Kegiatan" :start="old('start_date', $activity->start_date)" :end="old('end_date', $activity->end_date)" hint="Klik tanggal mulai, lalu tanggal selesai." />
+        <x-date-range label="Tanggal Kegiatan" :start="old('start_date', $activity->start_date)" :end="old('end_date', $activity->end_date)"
+            :min="$selectedProgramPeriod['min']" :max="$selectedProgramPeriod['max']" bounds-event="activity-program-period"
+            hint="Klik tanggal mulai, lalu tanggal selesai." />
     </div>
 
     <label class="field">

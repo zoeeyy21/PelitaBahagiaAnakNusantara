@@ -9,7 +9,7 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <x-page-header title="Donasi" description="Pantau dan konfirmasi donasi yang masuk.">
+        <x-page-header title="Donasi" description="Pantau donasi yang masuk.">
             <a href="{{ route('admin.donations.export', $exportQuery) }}" class="btn btn-secondary">
                 <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.69L6.28 8.47a.75.75 0 0 0-1.06 1.06l4.25 4.25a.75.75 0 0 0 1.06 0l4.25-4.25a.75.75 0 1 0-1.06-1.06l-2.97 2.97V2.75Z"/><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z"/></svg>
                 Export CSV / Excel
@@ -38,8 +38,8 @@
             <p class="mb-3 text-sm text-stone-500">
                 {{ number_format($donations->total(), 0, ',', '.') }} donasi
                 @if ($filters['start_date'] || $filters['end_date'])
-                    · {{ $filters['start_date'] ? \Illuminate\Support\Carbon::parse($filters['start_date'])->translatedFormat('d M Y') : 'awal' }}
-                    – {{ $filters['end_date'] ? \Illuminate\Support\Carbon::parse($filters['end_date'])->translatedFormat('d M Y') : 'sekarang' }}
+                    · {{ $filters['start_date'] ? \Illuminate\Support\Carbon::parse($filters['start_date'])->toIndonesianDate() : 'awal' }}
+                    – {{ $filters['end_date'] ? \Illuminate\Support\Carbon::parse($filters['end_date'])->toIndonesianDate() : 'sekarang' }}
                 @else
                     · semua tanggal
                 @endif
@@ -54,7 +54,6 @@
                                 <th class="px-6 py-3">No. HP</th>
                                 <th class="px-6 py-3">Program</th>
                                 <th class="px-6 py-3 text-right">Nominal</th>
-                                <th class="px-6 py-3">Status</th>
                                 <th class="px-6 py-3">Tanggal</th>
                             </tr>
                         </thead>
@@ -67,12 +66,11 @@
                                     <td class="whitespace-nowrap px-6 py-4 text-stone-500">{{ $donation->donor_phone ?? '-' }}</td>
                                     <td class="min-w-[12rem] px-6 py-4 text-stone-500">{{ $donation->program?->title ?? 'Donasi Umum' }}</td>
                                     <td class="whitespace-nowrap px-6 py-4 text-right font-semibold tabular-nums text-stone-900">Rp{{ number_format($donation->amount, 0, ',', '.') }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4"><span @class(['badge', 'badge-active' => $donation->status === 'paid', 'badge-muted' => $donation->status !== 'paid'])>{{ $donation->statusLabel() }}</span></td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-stone-500">{{ $donation->created_at->format('d M Y H:i') }}</td>
+                                    <td class="whitespace-nowrap px-6 py-4 text-stone-500">{{ $donation->created_at->toIndonesianDateTime() }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-6 text-center text-stone-500">Tidak ada donasi pada filter ini.</td>
+                                    <td colspan="5" class="px-6 py-6 text-center text-stone-500">Tidak ada donasi pada filter ini.</td>
                                 </tr>
                             @endforelse
                         </tbody>

@@ -25,7 +25,7 @@
             <textarea name="goal" rows="4" class="field-input">{{ old('goal', $program->goal) }}</textarea>
         </label>
         <label class="field">
-            <span class="field-label">Penerima Manfaat</span>
+            <span class="field-label">Penerima Program</span>
             <input name="beneficiaries" value="{{ old('beneficiaries', $program->beneficiaries) }}" class="field-input">
         </label>
     </div>
@@ -90,7 +90,7 @@
             </div>
 
             <div class="md:w-1/2">
-                <x-image-upload name="qris_image" label="QRIS Program" :current="$program->qris_image" />
+                <x-image-upload name="qris_image" label="QRIS Program" :current="$program->qris_image" fit="contain" />
             </div>
         </div>
     </div>

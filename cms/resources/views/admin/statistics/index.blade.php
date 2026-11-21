@@ -2,8 +2,6 @@
     $rupiah = fn (int|float|null $amount): string => 'Rp'.number_format((int) $amount, 0, ',', '.');
     $summaryTiles = [
         ['label' => 'Total Dana Terkumpul', 'value' => $rupiah($summary['total_collected']), 'hint' => number_format($summary['paid_donation_count'], 0, ',', '.').' donasi lunas (termasuk donasi umum)'],
-        ['label' => 'Terkumpul untuk Program', 'value' => $rupiah($summary['program_collected']), 'hint' => 'Dari '.$summary['program_count'].' program yang membuka donasi'],
-        ['label' => 'Total Target Donasi', 'value' => $rupiah($summary['total_target']), 'hint' => 'Kekurangan '.$rupiah($summary['total_remaining'])],
         ['label' => 'Program Mencapai Target', 'value' => $summary['reached_count'].' / '.$summary['program_count'], 'hint' => 'Program dengan donasi ≥ target'],
     ];
 @endphp
@@ -14,7 +12,7 @@
     </x-slot>
 
     <div class="mx-auto max-w-7xl space-y-8 px-4 pt-8 sm:px-6 lg:px-8">
-        <section aria-label="Ringkasan keuangan" class="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section aria-label="Ringkasan keuangan" class="stagger grid gap-4 sm:grid-cols-2">
             @foreach ($summaryTiles as $tile)
                 <div class="panel p-5">
                     <p class="text-sm font-medium text-stone-500">{{ $tile['label'] }}</p>

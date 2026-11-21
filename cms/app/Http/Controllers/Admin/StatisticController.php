@@ -33,12 +33,7 @@ class StatisticController extends Controller
         $sort = array_key_exists($request->query('sort'), self::SORT_OPTIONS) ? $request->query('sort') : 'collected_desc';
 
         $donationPrograms = Program::query()->where('accepts_donation', true);
-        $totalTarget = (int) (clone $donationPrograms)->sum('donation_target');
         $totalCollected = (int) Donation::query()->where('status', 'paid')->sum('amount');
-        $programCollected = (int) Donation::query()
-            ->where('status', 'paid')
-            ->whereIn('program_id', (clone $donationPrograms)->select('id'))
-            ->sum('amount');
 
         $programs = (clone $donationPrograms)
             ->withCollectedAmount()
@@ -53,12 +48,6 @@ class StatisticController extends Controller
             'programs' => $programs,
             'summary' => [
                 'total_collected' => $totalCollected,
-                'program_collected' => $programCollected,
-                'total_target' => $totalTarget,
-                'total_remaining' => (clone $donationPrograms)
-                    ->withCollectedAmount()
-                    ->get(['id', 'donation_target'])
-                    ->sum(fn (Program $program): int => $program->remainingDonationAmount()),
                 'program_count' => (clone $donationPrograms)->count(),
                 'reached_count' => (clone $donationPrograms)->whereDonationTargetReached()->count(),
                 'paid_donation_count' => Donation::query()->where('status', 'paid')->count(),

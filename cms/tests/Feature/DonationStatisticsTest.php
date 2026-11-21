@@ -28,15 +28,15 @@ class DonationStatisticsTest extends TestCase
         $response = $this->actingAs(User::factory()->create())->get('/admin/statistics')->assertOk();
 
         $response->assertViewHas('summary', fn (array $summary): bool => $summary['total_collected'] === 350000
-            && $summary['program_collected'] === 250000
-            && $summary['total_target'] === 1000000
-            && $summary['total_remaining'] === 750000
-            && $summary['reached_count'] === 0);
+            && $summary['reached_count'] === 0
+            && ! array_key_exists('total_target', $summary));
 
         $response->assertSee('Beasiswa')
             ->assertSee('Rp250.000')
             ->assertSee('Rp750.000')
             ->assertSee('25%')
+            ->assertDontSee('Terkumpul untuk Program')
+            ->assertDontSee('Total Target Donasi')
             ->assertDontSee('Tanpa Donasi');
     }
 

@@ -55,8 +55,8 @@
                 <p class="mt-2 text-slate-700">{{ $program->goal ?? 'Akan diperbarui.' }}</p>
             </div>
             <div class="rounded border border-primary-100 bg-white p-5">
-                <p class="text-sm font-semibold text-slate-500">Penerima manfaat</p>
-                <p class="mt-2 text-slate-700">{{ $program->beneficiaries ?? 'Masyarakat penerima manfaat.' }}</p>
+                <p class="text-sm font-semibold text-slate-500">Penerima program</p>
+                <p class="mt-2 text-slate-700">{{ $program->beneficiaries ?? 'Masyarakat penerima program.' }}</p>
             </div>
         </aside>
     </section>

@@ -47,8 +47,17 @@
 
         @if (auth()->check() && ! auth()->user()->hasCompletedBankProfile() && ! request()->routeIs('profile'))
             <dialog id="bank-profile-dialog" aria-labelledby="bank-profile-dialog-title"
-                x-data x-init="try { if (sessionStorage.getItem('bank-profile-dialog-dismissed') !== '1') { $el.showModal() } } catch (error) { $el.showModal() }"
-                x-on:close="try { sessionStorage.setItem('bank-profile-dialog-dismissed', '1') } catch (error) {}"
+                x-data="{
+                    alwaysShow: @js(request()->routeIs('dashboard')),
+                    wasDismissed() {
+                        try { return sessionStorage.getItem('bank-profile-dialog-dismissed') === '1' } catch (error) { return false }
+                    },
+                    rememberDismissal() {
+                        try { sessionStorage.setItem('bank-profile-dialog-dismissed', '1') } catch (error) {}
+                    },
+                }"
+                x-init="if (alwaysShow || ! wasDismissed()) { $el.showModal() }"
+                x-on:close="rememberDismissal()"
                 class="w-[min(28rem,calc(100vw-2rem))] rounded-3xl p-0 shadow-2xl backdrop:bg-stone-900/40 backdrop:backdrop-blur-sm open:motion-safe:animate-toast-in">
                 <div class="p-6">
                     <div class="flex items-start gap-4">

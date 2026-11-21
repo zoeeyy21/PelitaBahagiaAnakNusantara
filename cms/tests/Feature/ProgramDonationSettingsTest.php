@@ -171,4 +171,16 @@ class ProgramDonationSettingsTest extends TestCase
             $mock->shouldReceive('createSnapTransaction')->andReturn((object) ['token' => 'snap-token', 'redirect_url' => null]);
         });
     }
+
+    public function test_program_form_uses_new_beneficiary_label_and_uncropped_qris_preview(): void
+    {
+        $program = Program::factory()->create(['qris_image' => 'programs/qris.png']);
+
+        $this->actingAs(User::factory()->create())->get("/admin/programs/{$program->slug}/edit")
+            ->assertOk()
+            ->assertSee('Penerima Program')
+            ->assertDontSee('Penerima Manfaat')
+            ->assertSee('id="preview-qris_image"', false)
+            ->assertSee('object-contain', false);
+    }
 }

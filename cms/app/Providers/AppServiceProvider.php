@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Controllers\DonationController;
 use App\Models\Program;
 use App\Models\SiteSetting;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerDateFormats();
+
         View::composer(['public.contact', 'layouts.public'], function (\Illuminate\View\View $view): void {
             $view->with('contact', SiteSetting::contact());
         });
@@ -50,6 +53,27 @@ class AppServiceProvider extends ServiceProvider
                     ],
                 ])->all(),
             ]);
+        });
+    }
+
+    /**
+     * Format tanggal admin, disamakan dengan label kalender filter (mis. "5 Agu 2026").
+     * Singkatan bulan sengaja ditulis tetap agar identik dengan formatter di resources/js/app.js.
+     */
+    private function registerDateFormats(): void
+    {
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        Carbon::macro('toIndonesianDate', function () use ($months): string {
+            /** @var Carbon $this */
+            return $this->day.' '.$months[$this->month - 1].' '.$this->year;
+        });
+
+        Carbon::macro('toIndonesianDateTime', function () use ($months): string {
+            /** @var Carbon $this */
+            $local = $this->copy()->setTimezone(config('app.display_timezone'));
+
+            return $local->day.' '.$months[$local->month - 1].' '.$local->year.', '.$local->format('H:i T');
         });
     }
 }

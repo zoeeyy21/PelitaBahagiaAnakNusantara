@@ -58,7 +58,7 @@
             @else
             <div class="stagger grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 @forelse ($activities as $activity)
-                    <x-content-card :seed="$activity->id" badge="Kegiatan" :headline="$activity->title" :subline="$activity->dateRangeLabel('d F Y')" :cover="$activity->cover_image" :title="$activity->title">
+                    <x-content-card :seed="$activity->id" badge="Kegiatan" :headline="$activity->title" :subline="$activity->dateRangeLabel()" :cover="$activity->cover_image" :title="$activity->title">
                         <p class="mt-3 text-[15px] leading-6 text-stone-500">{{ $activity->excerpt }}</p>
                         <x-card-note label="Program:">{{ $activity->program?->title ?? 'Tidak terkait program' }} · {{ $activity->gallery_items_count }} foto galeri</x-card-note>
 

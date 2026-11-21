@@ -6,6 +6,9 @@
     'end' => null,
     'placeholder' => 'Pilih rentang tanggal',
     'hint' => null,
+    'min' => null,
+    'max' => null,
+    'boundsEvent' => null,
 ])
 
 @php
@@ -13,7 +16,8 @@
 @endphp
 
 <div {{ $attributes->class('field') }}
-    x-data="dateRange({ start: @js($toDateString($start)), end: @js($toDateString($end)) })"
+    x-data="dateRange({ start: @js($toDateString($start)), end: @js($toDateString($end)), min: @js($toDateString($min)), max: @js($toDateString($max)) })"
+    @if ($boundsEvent) x-on:{{ $boundsEvent }}.window="setBounds($event.detail)" @endif
     x-on:keydown.escape="open = false"
     x-on:click.outside="open = false">
     @if ($label)
@@ -52,12 +56,13 @@
             <div class="grid grid-cols-7 gap-y-1 text-center text-sm">
                 <template x-for="cell in cells()" :key="cell.key">
                     <button type="button" x-on:click="cell.date && pick(cell.date)" x-on:mouseenter="hover = cell.date"
-                        :disabled="! cell.date"
+                        :disabled="! cell.date || isOutOfBounds(cell.date)"
                         :class="{
                             'invisible': ! cell.date,
                             'bg-primary-700 text-white font-semibold': isEdge(cell.date),
                             'bg-primary-50 text-primary-800': ! isEdge(cell.date) && isInRange(cell.date),
-                            'text-stone-700 hover:bg-stone-100': cell.date && ! isEdge(cell.date) && ! isInRange(cell.date),
+                            'cursor-not-allowed text-stone-300': cell.date && isOutOfBounds(cell.date),
+                            'text-stone-700 hover:bg-stone-100': cell.date && ! isOutOfBounds(cell.date) && ! isEdge(cell.date) && ! isInRange(cell.date),
                             'ring-1 ring-inset ring-primary-300': cell.date === today && ! isEdge(cell.date),
                         }"
                         class="mx-auto flex size-9 items-center justify-center rounded-full transition" x-text="cell.day"></button>
@@ -68,8 +73,9 @@
     </div>
 
     @if ($hint)
-        <span class="field-hint">{{ $hint }}</span>
+        <span class="field-hint" x-show="! boundsLabel()">{{ $hint }}</span>
     @endif
+    <span class="field-hint font-medium text-primary-700" x-show="boundsLabel()" x-cloak x-text="boundsLabel()"></span>
     @error($startName) <span class="field-error">{{ $message }}</span> @enderror
     @error($endName) <span class="field-error">{{ $message }}</span> @enderror
 </div>

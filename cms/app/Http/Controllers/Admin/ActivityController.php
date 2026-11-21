@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Program;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -120,14 +122,15 @@ class ActivityController extends Controller
     {
         $existingPaths = $activity?->imagePaths() ?? [];
         $remainingSlots = max(0, self::MAX_IMAGES - count($this->keptImagePaths($request, $existingPaths)));
+        $withinProgramPeriod = $this->withinProgramPeriodRule(Program::find($request->input('program_id')));
 
         return $request->validate([
             'program_id' => ['nullable', 'exists:programs,id'],
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('activities', 'slug')->ignore($activity)],
             'body' => ['required', 'string'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'start_date' => ['nullable', 'date', $withinProgramPeriod],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date', $withinProgramPeriod],
             'keep_images' => ['nullable', 'array'],
             'keep_images.*' => ['string', Rule::in($existingPaths)],
             'images' => ['nullable', 'array', 'max:'.$remainingSlots],
@@ -138,6 +141,32 @@ class ActivityController extends Controller
         ], [
             'images.*' => 'gambar',
         ]);
+    }
+
+    /**
+     * Tanggal kegiatan harus berada di dalam periode program terkait (bila program punya periode).
+     */
+    private function withinProgramPeriodRule(?Program $program): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($program): void {
+            if (! $program || (! $program->start_date && ! $program->end_date) || ! is_string($value) || strtotime($value) === false) {
+                return;
+            }
+
+            $date = Carbon::parse($value)->startOfDay();
+            $isBeforeProgram = $program->start_date && $date->lt($program->start_date);
+            $isAfterProgram = $program->end_date && $date->gt($program->end_date);
+
+            if ($isBeforeProgram || $isAfterProgram) {
+                $period = match (true) {
+                    $program->start_date && $program->end_date => $program->dateRangeLabel(),
+                    (bool) $program->start_date => 'mulai '.$program->start_date->toIndonesianDate(),
+                    default => 'sampai '.$program->end_date->toIndonesianDate(),
+                };
+
+                $fail('Tanggal kegiatan harus di dalam periode program "'.$program->title.'" ('.$period.').');
+            }
+        };
     }
 
     /**

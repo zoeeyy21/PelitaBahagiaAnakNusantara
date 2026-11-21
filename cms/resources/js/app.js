@@ -116,18 +116,23 @@ document.addEventListener('livewire:navigated', runCountUps);
  */
 const pad = (number) => String(number).padStart(2, '0');
 const toIsoDate = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+// Sama persis dengan macro Carbon "toIndonesianDate" di AppServiceProvider (mis. "5 Agu 2026").
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const formatIndonesianDate = (date) => `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`;
 const parseIsoDate = (value) => {
     const [year, month, day] = value.split('-').map(Number);
 
     return new Date(year, month - 1, day);
 };
 
-function dateRange({ start = '', end = '' } = {}) {
-    const initial = start ? parseIsoDate(start) : new Date();
+function dateRange({ start = '', end = '', min = '', max = '' } = {}) {
+    const initial = start ? parseIsoDate(start) : (min ? parseIsoDate(min) : new Date());
 
     return {
         start,
         end,
+        min,
+        max,
         hover: null,
         open: false,
         today: toIsoDate(new Date()),
@@ -141,6 +146,60 @@ function dateRange({ start = '', end = '' } = {}) {
         clear() {
             this.start = '';
             this.end = '';
+        },
+
+        /**
+         * Batasi tanggal yang bisa dipilih (mis. periode program). Tanggal terpilih yang
+         * berada di luar batas digeser ke batas terdekat.
+         */
+        setBounds({ min = '', max = '' } = {}) {
+            this.min = min || '';
+            this.max = max || '';
+
+            const clamp = (date) => {
+                if (!date) {
+                    return date;
+                }
+
+                if (this.min && date < this.min) {
+                    return this.min;
+                }
+
+                return this.max && date > this.max ? this.max : date;
+            };
+
+            this.start = clamp(this.start);
+            this.end = clamp(this.end);
+
+            if (this.end && this.start && this.end < this.start) {
+                this.end = '';
+            }
+
+            const focus = this.start || this.min;
+
+            if (focus) {
+                const date = parseIsoDate(focus);
+                this.viewYear = date.getFullYear();
+                this.viewMonth = date.getMonth();
+            }
+        },
+
+        isOutOfBounds(date) {
+            return date !== null && ((this.min && date < this.min) || (this.max && date > this.max));
+        },
+
+        boundsLabel() {
+            if (!this.min && !this.max) {
+                return '';
+            }
+
+            const format = (value) => formatIndonesianDate(parseIsoDate(value));
+
+            if (this.min && this.max) {
+                return `Periode program: ${format(this.min)} – ${format(this.max)}`;
+            }
+
+            return this.min ? `Periode program: mulai ${format(this.min)}` : `Periode program: sampai ${format(this.max)}`;
         },
 
         shiftMonth(step) {
@@ -167,6 +226,10 @@ function dateRange({ start = '', end = '' } = {}) {
         },
 
         pick(date) {
+            if (this.isOutOfBounds(date)) {
+                return;
+            }
+
             if (!this.start || this.end || date < this.start) {
                 this.start = date;
                 this.end = '';
@@ -193,7 +256,7 @@ function dateRange({ start = '', end = '' } = {}) {
         },
 
         displayLabel() {
-            const format = (value) => parseIsoDate(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            const format = (value) => formatIndonesianDate(parseIsoDate(value));
 
             if (!this.start) {
                 return '';

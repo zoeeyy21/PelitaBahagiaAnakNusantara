@@ -52,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::put('contact', [AdminContactSettingController::class, 'update'])->name('contact.update');
         Route::get('donations/export', [AdminDonationController::class, 'export'])->name('donations.export');
         Route::post('donations/{donation}/sync-midtrans', [AdminDonationController::class, 'syncMidtrans'])->name('donations.sync-midtrans');
-        Route::resource('donations', AdminDonationController::class)->only(['index', 'show', 'update', 'destroy']);
+        Route::resource('donations', AdminDonationController::class)->only(['index', 'show', 'destroy']);
     });
 });
 

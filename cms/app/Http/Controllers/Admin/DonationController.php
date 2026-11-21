@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -44,20 +43,20 @@ class DonationController extends Controller
         return response()->streamDownload(function () use ($query): void {
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\u{FEFF}");
-            fputcsv($handle, ['Tanggal', 'Donatur', 'Anonim', 'No. HP', 'Email', 'Program', 'Nominal', 'Status', 'Metode Pembayaran', 'Dibayar', 'Pesan'], escape: '');
+            fputcsv($handle, ['Tanggal', 'Donatur', 'Anonim', 'No. HP', 'Email', 'Program', 'Nominal', 'Metode Pembayaran', 'Pesan'], escape: '');
 
-            $query->lazy()->each(function (Donation $donation) use ($handle): void {
+            $timezone = config('app.display_timezone');
+
+            $query->lazy()->each(function (Donation $donation) use ($handle, $timezone): void {
                 fputcsv($handle, [
-                    $donation->created_at->format('Y-m-d H:i'),
+                    $donation->created_at->copy()->setTimezone($timezone)->format('Y-m-d H:i'),
                     $donation->donor_name,
                     $donation->is_anonymous ? 'Ya' : 'Tidak',
                     $donation->donor_phone,
                     $donation->donor_email,
                     $donation->program?->title ?? 'Donasi Umum',
                     $donation->amount,
-                    $donation->statusLabel(),
                     $donation->paymentMethodLabel(),
-                    $donation->paid_at?->format('Y-m-d H:i'),
                     $donation->message,
                 ], escape: '');
             });
@@ -75,12 +74,13 @@ class DonationController extends Controller
     {
         $hasDateFilter = $request->has('start_date') || $request->has('end_date');
         $program = $request->query('program');
+        $today = now(config('app.display_timezone'));
 
         $filters = [
             'search' => $request->string('search')->trim()->toString(),
             'program' => in_array($program, ['general'], true) || ctype_digit((string) $program) ? (string) $program : null,
-            'start_date' => $hasDateFilter ? $this->validDate($request->query('start_date')) : now()->subDays(6)->toDateString(),
-            'end_date' => $hasDateFilter ? $this->validDate($request->query('end_date')) : now()->toDateString(),
+            'start_date' => $hasDateFilter ? $this->validDate($request->query('start_date')) : $today->copy()->subDays(6)->toDateString(),
+            'end_date' => $hasDateFilter ? $this->validDate($request->query('end_date')) : $today->toDateString(),
         ];
 
         if ($filters['start_date'] && $filters['end_date'] && $filters['end_date'] < $filters['start_date']) {
@@ -122,8 +122,16 @@ class DonationController extends Controller
             })
             ->when($filters['program'] === 'general', fn (Builder $query) => $query->whereNull('program_id'))
             ->when($filters['program'] !== null && $filters['program'] !== 'general', fn (Builder $query) => $query->where('program_id', (int) $filters['program']))
-            ->when($filters['start_date'], fn (Builder $query, string $date) => $query->where('created_at', '>=', Carbon::parse($date)->startOfDay()))
-            ->when($filters['end_date'], fn (Builder $query, string $date) => $query->where('created_at', '<=', Carbon::parse($date)->endOfDay()));
+            ->when($filters['start_date'], fn (Builder $query, string $date) => $query->where('created_at', '>=', $this->dayBoundary($date)->startOfDay()->utc()))
+            ->when($filters['end_date'], fn (Builder $query, string $date) => $query->where('created_at', '<=', $this->dayBoundary($date)->endOfDay()->utc()));
+    }
+
+    /**
+     * Tanggal filter dibaca sebagai hari di zona tampilan (WIB), lalu dibandingkan dengan created_at yang tersimpan dalam UTC.
+     */
+    private function dayBoundary(string $date): Carbon
+    {
+        return Carbon::parse($date, config('app.display_timezone'));
     }
 
     public function create(): RedirectResponse
@@ -159,20 +167,6 @@ class DonationController extends Controller
     public function edit(Donation $donation): RedirectResponse
     {
         return redirect()->route('admin.donations.show', $donation);
-    }
-
-    public function update(Request $request, Donation $donation): RedirectResponse
-    {
-        $validated = $request->validate([
-            'status' => ['required', Rule::in(array_keys(Donation::STATUS_LABELS))],
-        ]);
-
-        $donation->update([
-            'status' => $validated['status'],
-            'paid_at' => $validated['status'] === 'paid' ? now() : null,
-        ]);
-
-        return redirect()->route('admin.donations.show', $donation)->with('status', 'Status donasi berhasil diperbarui.');
     }
 
     public function destroy(Donation $donation): RedirectResponse
