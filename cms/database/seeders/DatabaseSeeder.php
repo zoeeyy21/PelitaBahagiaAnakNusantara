@@ -20,11 +20,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Admin Pelita Bahagia',
-            'email' => env('SEED_ADMIN_EMAIL', 'admin@pelitabahagia.test'),
-            'password' => Hash::make(env('SEED_ADMIN_PASSWORD', 'password')),
-        ]);
+        User::firstOrCreate(
+            ['email' => env('SEED_ADMIN_EMAIL', 'admin@pelitabahagia.test')],
+            [
+                'name' => 'Admin Pelita Bahagia',
+                'password' => Hash::make(env('SEED_ADMIN_PASSWORD', 'password')),
+                'email_verified_at' => now(),
+            ]
+        );
 
         $programs = collect([
             [
