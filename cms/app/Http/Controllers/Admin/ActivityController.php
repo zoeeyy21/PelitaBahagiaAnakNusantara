@@ -129,14 +129,16 @@ class ActivityController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('activities', 'slug')->ignore($activity)],
             'body' => ['required', 'string'],
-            'start_date' => ['nullable', 'date', $withinProgramPeriod],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date', $withinProgramPeriod],
+            'start_date' => ['required', 'date', $withinProgramPeriod],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date', $withinProgramPeriod],
             'keep_images' => ['nullable', 'array'],
             'keep_images.*' => ['string', Rule::in($existingPaths)],
             'images' => ['nullable', 'array', 'max:'.$remainingSlots],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'images.max' => 'Maksimal '.self::MAX_IMAGES.' gambar per kegiatan.',
+            'start_date.required' => 'Tanggal mulai kegiatan wajib diisi.',
+            'end_date.required' => 'Tanggal selesai kegiatan wajib diisi.',
             'end_date.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
         ], [
             'images.*' => 'gambar',

@@ -10,10 +10,24 @@
 <x-app-layout>
     <x-slot name="header">
         <x-page-header title="Donasi" description="Pantau donasi yang masuk.">
-            <a href="{{ route('admin.donations.export', $exportQuery) }}" class="btn btn-secondary">
-                <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.69L6.28 8.47a.75.75 0 0 0-1.06 1.06l4.25 4.25a.75.75 0 0 0 1.06 0l4.25-4.25a.75.75 0 1 0-1.06-1.06l-2.97 2.97V2.75Z"/><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z"/></svg>
-                Export CSV / Excel
-            </a>
+            <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false" x-on:keydown.escape="open = false">
+                <button type="button" x-on:click="open = ! open" class="btn btn-secondary" :aria-expanded="open" aria-haspopup="menu">
+                    <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.69L6.28 8.47a.75.75 0 0 0-1.06 1.06l4.25 4.25a.75.75 0 0 0 1.06 0l4.25-4.25a.75.75 0 1 0-1.06-1.06l-2.97 2.97V2.75Z"/><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z"/></svg>
+                    Export
+                    <svg class="size-4 transition" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+                </button>
+                <div x-show="open" x-cloak x-transition.opacity.duration.150ms role="menu"
+                    class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-100 bg-white p-1.5 shadow-xl shadow-stone-900/10">
+                    <a href="{{ route('admin.donations.export', $exportQuery + ['format' => 'xlsx']) }}" role="menuitem" x-on:click="open = false" class="flex flex-col rounded-xl px-3 py-2.5 hover:bg-stone-50">
+                        <span class="text-sm font-semibold text-stone-900">Excel (.xlsx)</span>
+                        <span class="text-xs text-stone-500">Tabel rapi: header, format Rupiah, filter kolom, total.</span>
+                    </a>
+                    <a href="{{ route('admin.donations.export', $exportQuery + ['format' => 'csv']) }}" role="menuitem" x-on:click="open = false" class="flex flex-col rounded-xl px-3 py-2.5 hover:bg-stone-50">
+                        <span class="text-sm font-semibold text-stone-900">CSV (.csv)</span>
+                        <span class="text-xs text-stone-500">Data mentah untuk diolah di aplikasi lain.</span>
+                    </a>
+                </div>
+            </div>
         </x-page-header>
     </x-slot>
 

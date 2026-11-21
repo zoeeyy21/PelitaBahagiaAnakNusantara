@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ContactSettingTest extends TestCase
@@ -37,6 +39,61 @@ class ContactSettingTest extends TestCase
         $this->assertSame('pelitabahagia.id', $contact['instagram']);
         $this->assertSame('https://wa.me/6281234567890', $contact['whatsapp_url']);
         $this->assertSame('https://maps.app.goo.gl/contoh', $contact['map_url']);
+    }
+
+    public function test_tiktok_and_facebook_are_optional_and_become_links(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->put('/admin/contact', $this->validContact())->assertSessionHasNoErrors();
+
+        $contact = SiteSetting::contact();
+        $this->assertNull($contact['tiktok_url']);
+        $this->assertNull($contact['facebook_url']);
+
+        $this->actingAs($user)->put('/admin/contact', $this->validContact() + [
+            'tiktok' => '@pelitabahagia.id',
+            'facebook' => 'https://www.facebook.com/pelitabahagia',
+        ])->assertSessionHasNoErrors();
+
+        $contact = SiteSetting::contact();
+        $this->assertSame('https://www.tiktok.com/@pelitabahagia.id', $contact['tiktok_url']);
+        $this->assertSame('https://www.facebook.com/pelitabahagia', $contact['facebook_url']);
+        $this->getJson('/api/site')->assertJsonPath('data.social.tiktok', 'https://www.tiktok.com/@pelitabahagia.id')
+            ->assertJsonPath('data.social.facebook', 'https://www.facebook.com/pelitabahagia');
+    }
+
+    public function test_tiktok_and_facebook_are_validated(): void
+    {
+        $this->actingAs(User::factory()->create())->put('/admin/contact', $this->validContact() + [
+            'tiktok' => 'pelita bahagia',
+            'facebook' => 'javascript:alert(1)',
+        ])->assertSessionHasErrors(['tiktok', 'facebook']);
+    }
+
+    public function test_structure_image_can_be_replaced_and_removed(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->put('/admin/contact', $this->validContact() + [
+            'structure_image' => UploadedFile::fake()->image('bagan-salah.png'),
+        ])->assertSessionHasNoErrors();
+        $wrongUpload = SiteSetting::structureImage();
+
+        $this->actingAs($user)->put('/admin/contact', $this->validContact() + [
+            'structure_image' => UploadedFile::fake()->image('bagan.png'),
+        ])->assertSessionHasNoErrors();
+        $replacement = SiteSetting::structureImage();
+
+        Storage::disk('public')->assertMissing($wrongUpload);
+        Storage::disk('public')->assertExists($replacement);
+
+        $this->actingAs($user)->put('/admin/contact', $this->validContact() + ['remove_structure_image' => '1'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull(SiteSetting::structureImage());
+        Storage::disk('public')->assertMissing($replacement);
     }
 
     public function test_contact_update_is_validated(): void

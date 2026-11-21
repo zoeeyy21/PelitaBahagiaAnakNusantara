@@ -18,6 +18,8 @@ class ActivityImagesTest extends TestCase
         Storage::fake('public');
 
         $this->actingAs(User::factory()->create())->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Bakti Sosial',
             'body' => 'Isi.',
             'images' => [
@@ -43,6 +45,8 @@ class ActivityImagesTest extends TestCase
         Storage::fake('public');
 
         $this->actingAs(User::factory()->create())->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Kegiatan',
             'body' => 'Isi.',
             'images' => array_map(fn (int $index) => UploadedFile::fake()->image("foto-{$index}.jpg"), range(1, 11)),
@@ -57,6 +61,8 @@ class ActivityImagesTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Kegiatan',
             'body' => 'Isi.',
             'images' => array_map(fn (int $index) => UploadedFile::fake()->image("foto-{$index}.jpg"), range(1, 9)),
@@ -65,6 +71,8 @@ class ActivityImagesTest extends TestCase
         $activity = Activity::firstOrFail();
 
         $this->actingAs($user)->put("/admin/activities/{$activity->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => $activity->title,
             'slug' => $activity->slug,
             'body' => 'Isi.',
@@ -80,6 +88,8 @@ class ActivityImagesTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Kegiatan',
             'body' => 'Isi.',
             'images' => [UploadedFile::fake()->image('satu.jpg'), UploadedFile::fake()->image('dua.jpg')],
@@ -89,6 +99,8 @@ class ActivityImagesTest extends TestCase
         [$thumbnail, $secondImage] = $activity->imagePaths();
 
         $this->actingAs($user)->put("/admin/activities/{$activity->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => $activity->title,
             'slug' => $activity->slug,
             'body' => 'Isi.',
@@ -109,6 +121,8 @@ class ActivityImagesTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Kegiatan',
             'body' => 'Isi.',
             'images' => [UploadedFile::fake()->image('satu.jpg'), UploadedFile::fake()->image('dua.jpg')],

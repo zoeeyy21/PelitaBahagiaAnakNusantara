@@ -28,7 +28,7 @@
         </label>
         <x-date-range label="Tanggal Kegiatan" :start="old('start_date', $activity->start_date)" :end="old('end_date', $activity->end_date)"
             :min="$selectedProgramPeriod['min']" :max="$selectedProgramPeriod['max']" bounds-event="activity-program-period"
-            hint="Klik tanggal mulai, lalu tanggal selesai." />
+            hint="Wajib. Klik tanggal mulai, lalu tanggal selesai (klik tanggal yang sama dua kali untuk satu hari)." />
     </div>
 
     <label class="field">

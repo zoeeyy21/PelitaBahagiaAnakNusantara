@@ -30,10 +30,24 @@
                         </label>
                     </div>
 
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <label class="field">
+                            <span class="field-label">Username Instagram</span>
+                            <input name="instagram" value="{{ old('instagram', $contact['instagram']) }}" placeholder="pelitabahagia" class="field-input" required>
+                            @error('instagram') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+                        <label class="field">
+                            <span class="field-label">Username TikTok <span class="font-normal text-stone-400">(opsional)</span></span>
+                            <input name="tiktok" value="{{ old('tiktok', $contact['tiktok']) }}" placeholder="pelitabahagia" class="field-input">
+                            @error('tiktok') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+                    </div>
+
                     <label class="field">
-                        <span class="field-label">Username Instagram</span>
-                        <input name="instagram" value="{{ old('instagram', $contact['instagram']) }}" placeholder="pelitabahagia" class="field-input" required>
-                        @error('instagram') <span class="field-error">{{ $message }}</span> @enderror
+                        <span class="field-label">Link Facebook <span class="font-normal text-stone-400">(opsional)</span></span>
+                        <input type="url" name="facebook" value="{{ old('facebook', $contact['facebook']) }}" placeholder="https://www.facebook.com/pelitabahagia" class="field-input">
+                        <span class="field-hint">Salin link halaman Facebook yayasan dari browser.</span>
+                        @error('facebook') <span class="field-error">{{ $message }}</span> @enderror
                     </label>
 
                     <label class="field">
@@ -46,7 +60,7 @@
                     <div class="field border-t border-stone-100 pt-6">
                         <span class="field-label">Bagan Struktur Organisasi</span>
                         <p class="field-hint mt-1 mb-3">Upload gambar bagan struktur kepengurusan yayasan yang tampil di halaman Tentang Kami.</p>
-                        <x-image-upload name="structure_image" label="Foto Bagan Struktur" :current="$structureImage" />
+                        <x-image-upload name="structure_image" label="Foto Bagan Struktur" :current="$structureImage" fit="contain" zoomable removable hint="JPG, PNG, atau WEBP, maksimal 3 MB. Zoom dengan tombol +/−, Ctrl/⌘ + scroll, atau klik dua kali; seret untuk menggeser." />
                     </div>
 
                     <div class="field border-t border-stone-100 pt-6" x-data="{ faqs: @js(array_values(old('faqs', $faqs))) }">

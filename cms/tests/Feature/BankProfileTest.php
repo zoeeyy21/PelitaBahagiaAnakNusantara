@@ -44,11 +44,49 @@ class BankProfileTest extends TestCase
             ->assertHasErrors(['bank_name' => 'required', 'bank_account_number' => 'regex', 'bank_account_holder' => 'required', 'qris_image' => 'required']);
     }
 
+    public function test_removed_qris_must_be_replaced_before_saving(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('qris/qris-salah.png', 'gambar');
+        $user = User::factory()->create([
+            'bank_name' => 'BCA',
+            'bank_account_number' => '1234567890',
+            'bank_account_holder' => 'Yayasan',
+            'qris_image' => 'qris/qris-salah.png',
+        ]);
+
+        $component = Volt::actingAs($user)->test('profile.update-bank-information-form')
+            ->call('removeQrisImage')
+            ->call('updateBankInformation')
+            ->assertHasErrors(['qris_image' => 'required']);
+
+        $this->assertSame('qris/qris-salah.png', $user->fresh()->qris_image);
+
+        $component->set('qris_image', UploadedFile::fake()->image('qris-benar.png'))
+            ->call('updateBankInformation')
+            ->assertHasNoErrors();
+
+        Storage::disk('public')->assertMissing('qris/qris-salah.png');
+        Storage::disk('public')->assertExists($user->fresh()->qris_image);
+    }
+
+    public function test_newly_selected_qris_can_be_cancelled(): void
+    {
+        Storage::fake('public');
+
+        Volt::actingAs(User::factory()->create())->test('profile.update-bank-information-form')
+            ->set('qris_image', UploadedFile::fake()->image('qris-salah.png'))
+            ->call('removeQrisImage')
+            ->assertSet('qris_image', null)
+            ->assertSet('remove_qris_image', false);
+    }
+
     public function test_reminder_dialog_is_shown_until_bank_profile_is_complete(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get('/dashboard')->assertSee('id="bank-profile-dialog"', false);
+        $this->actingAs($user)->get('/dashboard')->assertSee('id="bank-profile-dialog"', false)->assertDontSee('Nanti saja');
+        $this->actingAs($user)->get('/admin/programs')->assertSee('id="bank-profile-dialog"', false);
         $this->actingAs($user)->get('/profile')->assertDontSee('id="bank-profile-dialog"', false);
 
         $user->update([

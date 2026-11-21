@@ -14,6 +14,8 @@ new class extends Component
     public string $bank_account_holder = '';
     public $qris_image = null;
     public ?string $current_qris_image = null;
+    public bool $remove_qris_image = false;
+    public int $qrisInputKey = 0;
 
     /**
      * Mount the component.
@@ -39,10 +41,10 @@ new class extends Component
             'bank_name' => ['required', 'string', 'max:100'],
             'bank_account_number' => ['required', 'string', 'regex:/^[0-9\-\s]{5,30}$/'],
             'bank_account_holder' => ['required', 'string', 'max:255'],
-            'qris_image' => [$this->current_qris_image ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'qris_image' => [$this->current_qris_image && ! $this->remove_qris_image ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'bank_account_number.regex' => 'Nomor rekening hanya boleh berisi angka, spasi, atau tanda -.',
-            'qris_image.required' => 'Gambar QRIS wajib diunggah.',
+            'qris_image.required' => $this->remove_qris_image ? 'QRIS lama dihapus, unggah gambar QRIS pengganti.' : 'Gambar QRIS wajib diunggah.',
         ], [
             'bank_name' => 'nama bank',
             'bank_account_number' => 'nomor rekening',
@@ -63,8 +65,30 @@ new class extends Component
 
         $user->update($validated);
 
-        $this->reset('qris_image');
+        $this->reset('qris_image', 'remove_qris_image');
+        $this->qrisInputKey++;
         $this->dispatch('bank-information-updated');
+    }
+
+    /**
+     * Hapus foto QRIS yang salah: file baru yang belum disimpan langsung dibatalkan, sedangkan
+     * QRIS tersimpan ditandai untuk diganti (QRIS wajib, jadi harus diunggah ulang sebelum disimpan).
+     */
+    public function removeQrisImage(): void
+    {
+        if ($this->qris_image) {
+            $this->reset('qris_image');
+            $this->qrisInputKey++;
+        } else {
+            $this->remove_qris_image = true;
+        }
+
+        $this->resetValidation('qris_image');
+    }
+
+    public function undoRemoveQrisImage(): void
+    {
+        $this->remove_qris_image = false;
     }
 }; ?>
 
@@ -103,10 +127,24 @@ new class extends Component
             <x-input-label for="qris_image" value="Gambar QRIS" />
             @if ($qris_image && method_exists($qris_image, 'temporaryUrl'))
                 <img src="{{ $qris_image->temporaryUrl() }}" alt="Pratinjau QRIS" class="mt-2 h-48 w-48 rounded-xl border border-stone-100 object-contain">
-            @elseif ($current_qris_image)
+            @elseif ($current_qris_image && ! $remove_qris_image)
                 <img src="{{ str_starts_with($current_qris_image, 'http') ? $current_qris_image : \Illuminate\Support\Facades\Storage::url($current_qris_image) }}" alt="QRIS saat ini" class="mt-2 h-48 w-48 rounded-xl border border-stone-100 object-contain">
             @endif
-            <input wire:model="qris_image" id="qris_image" type="file" accept="image/jpeg,image/png,image/webp" class="field-file mt-2">
+            @if ($remove_qris_image && ! $qris_image)
+                <div class="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-red-200 bg-red-50/60 px-4 py-3 text-sm text-red-700">
+                    <span>QRIS lama akan dihapus. Unggah gambar QRIS pengganti lalu simpan.</span>
+                    <button type="button" wire:click="undoRemoveQrisImage" class="font-semibold underline-offset-2 hover:underline">Batalkan</button>
+                </div>
+            @endif
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+                <input wire:model="qris_image" wire:key="qris-input-{{ $qrisInputKey }}" id="qris_image" type="file" accept="image/jpeg,image/png,image/webp" class="field-file flex-1">
+                @if ($qris_image || ($current_qris_image && ! $remove_qris_image))
+                    <button type="button" wire:click="removeQrisImage" class="btn btn-danger btn-sm">
+                        <x-icon name="trash" class="size-4" />
+                        {{ $qris_image ? 'Batalkan pilihan' : 'Hapus foto' }}
+                    </button>
+                @endif
+            </div>
             <p class="field-hint mt-1">JPG, PNG, atau WEBP, maksimal 2 MB.</p>
             <div wire:loading wire:target="qris_image" class="mt-1 text-xs text-stone-500">Mengunggah...</div>
             <x-input-error class="mt-2" :messages="$errors->get('qris_image')" />

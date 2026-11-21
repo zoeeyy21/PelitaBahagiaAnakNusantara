@@ -8,8 +8,6 @@ use App\Models\Program;
 use App\Models\User;
 use App\Services\MidtransService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -17,10 +15,8 @@ class ProgramDonationSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_open_donation_with_packages_target_qris_and_period(): void
+    public function test_admin_can_open_donation_with_packages_target_and_period(): void
     {
-        Storage::fake('public');
-
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
             'title' => 'Beasiswa',
             'description' => 'Deskripsi.',
@@ -34,7 +30,6 @@ class ProgramDonationSettingsTest extends TestCase
                 ['name' => '', 'amount' => ''],
                 ['name' => 'Paket Seragam', 'amount' => 150000],
             ],
-            'qris_image' => UploadedFile::fake()->image('qris.png'),
         ])->assertRedirect('/admin/programs');
 
         $program = Program::firstOrFail();
@@ -45,12 +40,13 @@ class ProgramDonationSettingsTest extends TestCase
         $this->assertSame('2026-11-01', $program->start_date->toDateString());
         $this->assertSame('2026-12-31', $program->end_date->toDateString());
         $this->assertSame([['Paket Buku', 50000], ['Paket Seragam', 150000]], $program->donationPackages->map(fn ($package) => [$package->name, $package->amount])->all());
-        Storage::disk('public')->assertExists($program->qris_image);
     }
 
     public function test_minimum_amount_is_required_when_program_has_no_packages(): void
     {
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Program',
             'description' => 'Deskripsi.',
             'status' => 'active',
@@ -64,6 +60,8 @@ class ProgramDonationSettingsTest extends TestCase
     public function test_target_is_required_when_donation_is_opened(): void
     {
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Program',
             'description' => 'Deskripsi.',
             'status' => 'active',
@@ -89,6 +87,8 @@ class ProgramDonationSettingsTest extends TestCase
         DonationPackage::factory()->for($program)->create(['amount' => 75000]);
 
         $this->actingAs(User::factory()->create())->put("/admin/programs/{$program->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => $program->title,
             'slug' => $program->slug,
             'description' => 'Deskripsi.',
@@ -172,15 +172,28 @@ class ProgramDonationSettingsTest extends TestCase
         });
     }
 
-    public function test_program_form_uses_new_beneficiary_label_and_uncropped_qris_preview(): void
+    public function test_program_form_uses_new_beneficiary_label_without_qris_upload(): void
     {
-        $program = Program::factory()->create(['qris_image' => 'programs/qris.png']);
+        $program = Program::factory()->create();
 
         $this->actingAs(User::factory()->create())->get("/admin/programs/{$program->slug}/edit")
             ->assertOk()
             ->assertSee('Penerima Program')
             ->assertDontSee('Penerima Manfaat')
-            ->assertSee('id="preview-qris_image"', false)
-            ->assertSee('object-contain', false);
+            ->assertDontSee('name="qris_image"', false);
+    }
+
+    public function test_program_period_is_required(): void
+    {
+        $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'title' => 'Program',
+            'description' => 'Deskripsi.',
+            'status' => 'active',
+        ])->assertSessionHasErrors([
+            'start_date' => 'Tanggal mulai periode program wajib diisi.',
+            'end_date' => 'Tanggal selesai periode program wajib diisi.',
+        ]);
+
+        $this->assertDatabaseCount(Program::class, 0);
     }
 }

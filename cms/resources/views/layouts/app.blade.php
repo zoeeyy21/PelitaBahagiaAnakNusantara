@@ -19,7 +19,7 @@
             <livewire:layout.navigation />
 
             @if (isset($header))
-                <header class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 motion-safe:animate-fade-up">
+                <header class="relative z-20 mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 motion-safe:animate-fade-up">
                     {{ $header }}
                 </header>
             @endif
@@ -46,18 +46,9 @@
         @endif
 
         @if (auth()->check() && ! auth()->user()->hasCompletedBankProfile() && ! request()->routeIs('profile'))
+            {{-- Wajib diisi: tidak bisa ditutup (tanpa tombol "Nanti saja" dan Esc dinonaktifkan) --}}
             <dialog id="bank-profile-dialog" aria-labelledby="bank-profile-dialog-title"
-                x-data="{
-                    alwaysShow: @js(request()->routeIs('dashboard')),
-                    wasDismissed() {
-                        try { return sessionStorage.getItem('bank-profile-dialog-dismissed') === '1' } catch (error) { return false }
-                    },
-                    rememberDismissal() {
-                        try { sessionStorage.setItem('bank-profile-dialog-dismissed', '1') } catch (error) {}
-                    },
-                }"
-                x-init="if (alwaysShow || ! wasDismissed()) { $el.showModal() }"
-                x-on:close="rememberDismissal()"
+                x-data x-init="$el.showModal()" x-on:cancel.prevent x-on:close="$el.showModal()"
                 class="w-[min(28rem,calc(100vw-2rem))] rounded-3xl p-0 shadow-2xl backdrop:bg-stone-900/40 backdrop:backdrop-blur-sm open:motion-safe:animate-toast-in">
                 <div class="p-6">
                     <div class="flex items-start gap-4">
@@ -66,11 +57,10 @@
                         </span>
                         <div>
                             <h2 id="bank-profile-dialog-title" class="text-lg font-semibold text-stone-900">Lengkapi profil bank</h2>
-                            <p class="mt-1 text-sm text-stone-500">Anda belum mengisi nama bank, nomor rekening, dan QRIS. Data ini wajib diisi agar donatur dapat menyalurkan donasi.</p>
+                            <p class="mt-1 text-sm text-stone-500">Anda belum mengisi nama bank, nomor rekening, dan QRIS. Data ini wajib diisi sebelum melanjutkan, agar donatur dapat menyalurkan donasi.</p>
                         </div>
                     </div>
-                    <div class="mt-6 flex justify-end gap-3">
-                        <form method="dialog"><button class="btn btn-secondary">Nanti saja</button></form>
+                    <div class="mt-6 flex justify-end">
                         <a href="{{ route('profile') }}#bank" class="btn btn-primary">Isi sekarang</a>
                     </div>
                 </div>

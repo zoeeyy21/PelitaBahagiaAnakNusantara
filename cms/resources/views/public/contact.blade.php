@@ -18,9 +18,15 @@
                 <a href="{{ $contact['whatsapp_url'] }}" target="_blank" rel="noopener" class="mt-2 inline-flex font-semibold text-primary-700">{{ $contact['whatsapp'] }}</a>
             </div>
             <div class="rounded border border-primary-100 bg-white p-5">
-                <p class="text-sm font-semibold text-slate-500">Email dan Instagram</p>
+                <p class="text-sm font-semibold text-slate-500">Email dan Media Sosial</p>
                 <a href="mailto:{{ $contact['email'] }}" class="mt-2 block text-slate-800">{{ $contact['email'] }}</a>
                 <a href="{{ $contact['instagram_url'] }}" target="_blank" rel="noopener" class="mt-1 block text-slate-800">{{ '@'.$contact['instagram'] }}</a>
+                @if ($contact['tiktok_url'])
+                    <a href="{{ $contact['tiktok_url'] }}" target="_blank" rel="noopener" class="mt-1 block text-slate-800">TikTok: {{ '@'.$contact['tiktok'] }}</a>
+                @endif
+                @if ($contact['facebook_url'])
+                    <a href="{{ $contact['facebook_url'] }}" target="_blank" rel="noopener" class="mt-1 block text-slate-800">Facebook</a>
+                @endif
             </div>
         </div>
     </section>

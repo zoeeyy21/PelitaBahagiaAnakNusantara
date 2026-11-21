@@ -61,13 +61,12 @@ class PublicApiController extends Controller
             'maps_url' => $contact['map_url'] ?? '',
             'stats' => $stats,
             'social' => [
-                'instagram' => $contact['instagram'] ?? 'pelitabahagia',
-                'facebook' => 'pelitabahagia',
-                'youtube' => 'PelitaBahagiaTV',
-                'tiktok' => 'pelitabahagia',
+                'instagram' => $contact['instagram_url'],
+                'tiktok' => $contact['tiktok_url'] ?? '',
+                'facebook' => $contact['facebook_url'] ?? '',
             ],
             'social_stats' => [
-                'instagram_handle' => '@' . ($contact['instagram'] ?? 'pelitabahagia'),
+                'instagram_handle' => '@'.($contact['instagram'] ?? 'pelitabahagia'),
                 'instagram_followers' => '12.4K',
                 'instagram_posts' => '180+',
                 'youtube_handle' => '@PelitaBahagiaTV',
@@ -205,6 +204,7 @@ class PublicApiController extends Controller
     public function faqs(): JsonResponse
     {
         $faqs = SiteSetting::faqs();
+
         return response()->json(['success' => true, 'data' => $faqs]);
     }
 
@@ -225,7 +225,7 @@ class PublicApiController extends Controller
         $minAmount = $program?->min_donation_amount ?? 10000;
 
         $validated = $request->validate([
-            'amount' => ['required', 'integer', 'min:' . $minAmount],
+            'amount' => ['required', 'integer', 'min:'.$minAmount],
             'donor_name' => ['nullable', 'string', 'max:255'],
             'name' => ['nullable', 'string', 'max:255'],
             'donor_email' => ['nullable', 'email', 'max:255'],
@@ -247,7 +247,7 @@ class PublicApiController extends Controller
 
         if ($request->filled('package_name') && $request->filled('package_qty')) {
             $pkgNote = "[Paket: {$request->input('package_name')} x {$request->input('package_qty')}]";
-            $message = $message ? $pkgNote . ' ' . $message : $pkgNote;
+            $message = $message ? $pkgNote.' '.$message : $pkgNote;
         }
 
         $paymentMethod = $request->input('payment_method') ?: 'qris';
@@ -261,7 +261,7 @@ class PublicApiController extends Controller
 
         $donation = Donation::create([
             'program_id' => $program?->id,
-            'reference_code' => 'YPB-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6)),
+            'reference_code' => 'YPB-'.now()->format('Ymd').'-'.Str::upper(Str::random(6)),
             'donation_type' => $program ? 'program' : 'general',
             'amount' => (int) $validated['amount'],
             'donor_name' => $isAnonymous ? 'Hamba Allah' : $donorName,
@@ -285,7 +285,7 @@ class PublicApiController extends Controller
                 $redirectUrl = $snapTransaction->redirect_url ?? null;
                 Cache::put("donation_snap_token_{$donation->reference_code}", $snapToken, now()->addDay());
             } catch (Throwable $e) {
-                Log::warning('Midtrans Snap tidak aktif atau gagal: ' . $e->getMessage(), [
+                Log::warning('Midtrans Snap tidak aktif atau gagal: '.$e->getMessage(), [
                     'donation_id' => $donation->id,
                 ]);
             }
@@ -373,7 +373,7 @@ class PublicApiController extends Controller
             'target' => $p->beneficiaries ?: 'Anak-anak nusantara',
             'status' => $p->status === 'active' ? 'Aktif' : 'Non-Aktif',
             'category' => 'Pendidikan',
-            'period' => $p->start_date ? 'Periode ' . Carbon::parse($p->start_date)->format('Y') : 'Periode 2026',
+            'period' => $p->start_date ? 'Periode '.Carbon::parse($p->start_date)->format('Y') : 'Periode 2026',
             'start_date' => $p->start_date ? Carbon::parse($p->start_date)->format('Y-m-d') : null,
             'end_date' => $p->end_date ? Carbon::parse($p->end_date)->format('Y-m-d') : null,
             'image' => $p->cover_image,
@@ -421,7 +421,7 @@ class PublicApiController extends Controller
         }
 
         $packages = $p->donationPackages->map(fn ($pkg) => [
-            'id' => 'pkg-' . $pkg->id,
+            'id' => 'pkg-'.$pkg->id,
             'name' => $pkg->name,
             'price' => (int) $pkg->amount,
             'unit' => '/ paket',
@@ -436,7 +436,7 @@ class PublicApiController extends Controller
 
         $story = array_values(array_filter([
             $p->summary,
-            $p->goal ? 'Tujuan: ' . $p->goal : null,
+            $p->goal ? 'Tujuan: '.$p->goal : null,
             strip_tags($p->description),
             'Setiap donasi yang Anda salurkan akan dialokasikan langsung untuk operasional dan pemenuhan kebutuhan anak-anak penerima manfaat pada program ini.',
         ]));
@@ -463,4 +463,3 @@ class PublicApiController extends Controller
         ];
     }
 }
-

@@ -100,6 +100,8 @@ class CmsRequirementsTest extends TestCase
     public function test_activity_created_in_cms_is_immediately_public(): void
     {
         $this->actingAs(User::factory()->create())->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Kegiatan Baru',
             'body' => 'Isi kegiatan baru.',
         ])->assertRedirect('/admin/activities');
@@ -182,6 +184,8 @@ class CmsRequirementsTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->post('/admin/activities', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Kegiatan Bergambar',
             'body' => 'Isi.',
             'images' => [UploadedFile::fake()->image('lama.jpg')],
@@ -191,6 +195,8 @@ class CmsRequirementsTest extends TestCase
         $oldCover = $activity->cover_image;
 
         $this->actingAs($user)->put("/admin/activities/{$activity->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => $activity->title,
             'slug' => $activity->slug,
             'body' => 'Isi.',
@@ -246,6 +252,8 @@ class CmsRequirementsTest extends TestCase
     public function test_program_slug_is_generated_from_title(): void
     {
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Sekolah Ceria & Sehat 2026!',
             'summary' => 'Ringkasan.',
             'description' => 'Deskripsi.',

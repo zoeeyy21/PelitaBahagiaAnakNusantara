@@ -78,6 +78,12 @@
                             <a href="{{ $contact['whatsapp_url'] }}" target="_blank" rel="noopener">WhatsApp: {{ $contact['whatsapp'] }}</a>
                             <a href="mailto:{{ $contact['email'] }}">Email: {{ $contact['email'] }}</a>
                             <a href="{{ $contact['instagram_url'] }}" target="_blank" rel="noopener">Instagram: {{ '@'.$contact['instagram'] }}</a>
+                            @if ($contact['tiktok_url'])
+                                <a href="{{ $contact['tiktok_url'] }}" target="_blank" rel="noopener">TikTok: {{ '@'.$contact['tiktok'] }}</a>
+                            @endif
+                            @if ($contact['facebook_url'])
+                                <a href="{{ $contact['facebook_url'] }}" target="_blank" rel="noopener">Facebook</a>
+                            @endif
                         </div>
                     </div>
                 </div>

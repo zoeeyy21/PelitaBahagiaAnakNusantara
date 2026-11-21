@@ -39,7 +39,6 @@ class ProgramController extends Controller
         $validated['summary'] = $this->summarize($validated['description']);
         $validated['published_at'] = now();
         $validated['cover_image'] = $this->storeImage($request, $validated, 'cover_image');
-        $validated['qris_image'] = $this->storeImage($request, $validated, 'qris_image');
 
         DB::transaction(function () use ($validated, $packages): void {
             $program = Program::create($validated);
@@ -73,15 +72,16 @@ class ProgramController extends Controller
         $validated['slug'] = $this->uniqueSlug($validated['slug'] ?: $validated['title'], $program);
         $validated['summary'] = $this->summarize($validated['description']);
 
-        foreach (['cover_image', 'qris_image'] as $imageField) {
-            $storedPath = $this->storeImage($request, $validated, $imageField);
+        $coverPath = $this->storeImage($request, $validated, 'cover_image');
 
-            if ($storedPath) {
-                $this->deleteStoredFile($program->{$imageField});
-                $validated[$imageField] = $storedPath;
-            } else {
-                unset($validated[$imageField]);
-            }
+        if ($coverPath) {
+            $this->deleteStoredFile($program->cover_image);
+            $validated['cover_image'] = $coverPath;
+        } elseif ($request->boolean('remove_cover_image')) {
+            $this->deleteStoredFile($program->cover_image);
+            $validated['cover_image'] = null;
+        } else {
+            unset($validated['cover_image']);
         }
 
         DB::transaction(function () use ($program, $validated, $packages): void {
@@ -98,14 +98,13 @@ class ProgramController extends Controller
     public function destroy(Program $program): RedirectResponse
     {
         $this->deleteStoredFile($program->cover_image);
-        $this->deleteStoredFile($program->qris_image);
         $program->delete();
 
         return redirect()->route('admin.programs.index')->with('status', 'Program berhasil dihapus.');
     }
 
     /**
-     * Pengaturan donasi (target, paket, nominal minimal, QRIS) hanya divalidasi dan disimpan
+     * Pengaturan donasi (target, paket, nominal minimal) hanya divalidasi dan disimpan
      * saat program membuka donasi. Bila tidak, data donasi yang sudah ada dibiarkan apa adanya.
      *
      * @return array<string, mixed>
@@ -128,9 +127,10 @@ class ProgramController extends Controller
             'description' => ['required', 'string'],
             'goal' => ['nullable', 'string', 'max:1000'],
             'beneficiaries' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'cover_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_cover_image' => ['nullable', 'boolean'],
             'status' => ['required', Rule::in(array_keys(Program::STATUS_LABELS))],
             'accepts_donation' => ['boolean'],
         ];
@@ -142,20 +142,24 @@ class ProgramController extends Controller
                 'packages.*.name' => ['required', 'string', 'max:100'],
                 'packages.*.amount' => ['required', 'integer', 'min:1000'],
                 'min_donation_amount' => [Rule::requiredIf(count($request->input('packages')) === 0), 'nullable', 'integer', 'min:1000'],
-                'qris_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             ];
         }
 
-        return $request->validate($rules, [
+        $validated = $request->validate($rules, [
             'min_donation_amount.required' => 'Isi nominal minimal donasi bila program tidak memiliki paket donasi.',
+            'start_date.required' => 'Tanggal mulai periode program wajib diisi.',
+            'end_date.required' => 'Tanggal selesai periode program wajib diisi.',
             'end_date.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
         ], [
             'donation_target' => 'target donasi',
             'min_donation_amount' => 'nominal minimal',
             'packages.*.name' => 'nama paket',
             'packages.*.amount' => 'nominal paket',
-            'qris_image' => 'QRIS',
         ]);
+
+        unset($validated['remove_cover_image']);
+
+        return $validated;
     }
 
     /**
@@ -203,7 +207,7 @@ class ProgramController extends Controller
     }
 
     /**
-     * Simpan gambar hanya bila field tersebut ikut divalidasi (mis. QRIS saat donasi dibuka).
+     * Simpan gambar hanya bila field tersebut ikut divalidasi.
      *
      * @param  array<string, mixed>  $validated
      */

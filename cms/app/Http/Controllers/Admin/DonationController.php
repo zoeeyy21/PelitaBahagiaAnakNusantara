@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
 use App\Models\Program;
+use App\Services\DonationSpreadsheetExporter;
 use App\Services\MidtransService;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,37 +33,62 @@ class DonationController extends Controller
     }
 
     /**
-     * Unduh donasi sesuai filter yang sedang aktif sebagai CSV (bisa dibuka di Excel).
+     * Unduh donasi sesuai filter yang sedang aktif sebagai Excel (.xlsx, default) atau CSV.
      */
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request, DonationSpreadsheetExporter $spreadsheetExporter): StreamedResponse
     {
         $filters = $this->filters($request);
         $query = $this->filteredQuery($filters)->with('program')->latest();
-        $fileName = 'donasi-'.($filters['start_date'] ?? 'awal').'-sd-'.($filters['end_date'] ?? now()->toDateString()).'.csv';
+        $baseFileName = 'donasi-'.($filters['start_date'] ?? 'awal').'-sd-'.($filters['end_date'] ?? now()->toDateString());
+
+        if ($request->query('format') !== 'csv') {
+            return response()->streamDownload(
+                fn () => $spreadsheetExporter->write($query, $this->filterSummary($filters), 'php://output'),
+                $baseFileName.'.xlsx',
+                ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+            );
+        }
 
         return response()->streamDownload(function () use ($query): void {
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\u{FEFF}");
-            fputcsv($handle, ['Tanggal', 'Donatur', 'Anonim', 'No. HP', 'Email', 'Program', 'Nominal', 'Metode Pembayaran', 'Pesan'], escape: '');
+            fputcsv($handle, array_keys(DonationSpreadsheetExporter::COLUMNS), escape: '');
 
-            $timezone = config('app.display_timezone');
-
-            $query->lazy()->each(function (Donation $donation) use ($handle, $timezone): void {
+            $query->lazy()->each(function (Donation $donation) use ($handle): void {
                 fputcsv($handle, [
-                    $donation->created_at->copy()->setTimezone($timezone)->format('Y-m-d H:i'),
-                    $donation->donor_name,
-                    $donation->is_anonymous ? 'Ya' : 'Tidak',
-                    $donation->donor_phone,
-                    $donation->donor_email,
+                    ($donation->donor_name ?? '-').($donation->is_anonymous ? ' (anonim)' : ''),
+                    $donation->donor_phone ?? '-',
                     $donation->program?->title ?? 'Donasi Umum',
                     $donation->amount,
-                    $donation->paymentMethodLabel(),
-                    $donation->message,
+                    $donation->created_at->toIndonesianDateTime(),
                 ], escape: '');
             });
 
             fclose($handle);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }, $baseFileName.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Keterangan filter aktif untuk kepala laporan Excel.
+     *
+     * @param  array{search: string, program: ?string, start_date: ?string, end_date: ?string}  $filters
+     * @return list<string>
+     */
+    private function filterSummary(array $filters): array
+    {
+        $formatDate = fn (?string $date, string $fallback): string => $date ? Carbon::parse($date)->toIndonesianDate() : $fallback;
+
+        $program = match ($filters['program']) {
+            null => 'Semua program',
+            'general' => 'Donasi Umum',
+            default => Program::query()->whereKey((int) $filters['program'])->value('title') ?? 'Semua program',
+        };
+
+        return array_values(array_filter([
+            'Periode: '.$formatDate($filters['start_date'], 'awal').' – '.$formatDate($filters['end_date'], 'sekarang'),
+            'Program: '.$program,
+            $filters['search'] !== '' ? 'Pencarian: "'.$filters['search'].'"' : null,
+        ]));
     }
 
     /**

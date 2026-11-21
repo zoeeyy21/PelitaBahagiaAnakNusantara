@@ -56,6 +56,8 @@ class AdminCmsTest extends TestCase
         Storage::fake('public');
 
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Program Baru',
             'description' => 'Deskripsi program baru.',
             'status' => 'active',
@@ -70,11 +72,33 @@ class AdminCmsTest extends TestCase
         Storage::disk('public')->assertExists($program->cover_image);
     }
 
+    public function test_admin_can_remove_program_cover(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('programs/cover-salah.jpg', 'gambar');
+        $program = Program::factory()->create(['cover_image' => 'programs/cover-salah.jpg']);
+
+        $this->actingAs(User::factory()->create())->put("/admin/programs/{$program->slug}", [
+            'title' => $program->title,
+            'slug' => $program->slug,
+            'description' => 'Deskripsi.',
+            'status' => 'active',
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
+            'remove_cover_image' => '1',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull($program->fresh()->cover_image);
+        Storage::disk('public')->assertMissing('programs/cover-salah.jpg');
+    }
+
     public function test_program_slug_is_made_unique(): void
     {
         Program::factory()->create(['title' => 'Program Baru', 'slug' => 'program-baru']);
 
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Program Baru',
             'description' => 'Deskripsi.',
             'status' => 'inactive',
@@ -89,6 +113,8 @@ class AdminCmsTest extends TestCase
         $program = Program::factory()->create();
 
         $this->actingAs($user)->put("/admin/programs/{$program->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Judul Diubah',
             'slug' => $program->slug,
             'description' => 'Deskripsi diubah.',
@@ -111,6 +137,8 @@ class AdminCmsTest extends TestCase
         Storage::fake('public');
 
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Program Baru',
             'description' => 'Deskripsi.',
             'status' => 'active',
@@ -141,6 +169,8 @@ class AdminCmsTest extends TestCase
         $this->assertSame('2026-10-03', $activity->end_date->toDateString());
 
         $this->actingAs($user)->put("/admin/activities/{$activity->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => $activity->title,
             'slug' => $activity->slug,
             'body' => 'Isi kegiatan diubah.',
@@ -159,6 +189,8 @@ class AdminCmsTest extends TestCase
         $activity = Activity::factory()->create();
 
         $this->actingAs(User::factory()->create())->put("/admin/activities/{$activity->slug}", [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => $activity->title,
             'slug' => 'Bakti Sosial Ramadan',
             'body' => $activity->body,
@@ -170,6 +202,8 @@ class AdminCmsTest extends TestCase
     public function test_program_rejects_unknown_status(): void
     {
         $this->actingAs(User::factory()->create())->post('/admin/programs', [
+            'start_date' => '2026-11-01',
+            'end_date' => '2026-11-30',
             'title' => 'Program',
             'description' => 'Deskripsi.',
             'status' => 'draft',

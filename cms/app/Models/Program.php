@@ -31,7 +31,6 @@ class Program extends Model
         'accepts_donation',
         'donation_target',
         'min_donation_amount',
-        'qris_image',
         'published_at',
     ];
 

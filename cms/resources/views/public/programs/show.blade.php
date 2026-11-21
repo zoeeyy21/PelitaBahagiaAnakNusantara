@@ -44,12 +44,6 @@
                     <p class="mt-2 text-xs text-slate-500">dari target Rp{{ number_format($program->donation_target, 0, ',', '.') }}</p>
                 </div>
             @endif
-            @if ($program->isAcceptingDonations() && $program->qris_image)
-                <div class="rounded border border-primary-100 bg-white p-5">
-                    <p class="text-sm font-semibold text-slate-500">Donasi via QRIS</p>
-                    <img class="mt-3 w-full rounded" src="{{ str_starts_with($program->qris_image, 'http') ? $program->qris_image : \Illuminate\Support\Facades\Storage::url($program->qris_image) }}" alt="QRIS donasi {{ $program->title }}" loading="lazy">
-                </div>
-            @endif
             <div class="rounded border border-primary-100 bg-white p-5">
                 <p class="text-sm font-semibold text-slate-500">Tujuan</p>
                 <p class="mt-2 text-slate-700">{{ $program->goal ?? 'Akan diperbarui.' }}</p>

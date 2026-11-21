@@ -285,6 +285,194 @@ document.addEventListener('alpine:init', () => {
 });
 
 /**
+ * Zoom (tombol, scroll, cubit) dan geser (drag) gambar di dalam sebuah area.
+ * Dipakai oleh komponen <x-image-upload zoomable>, baik di kotak pratinjau maupun layar penuh.
+ * Butuh x-ref="stage" (area) dan x-ref="zoomImage" (gambar) di dalam komponen.
+ *
+ * wheelNeedsModifier: di kotak pratinjau, scroll biasa tetap menggulir halaman; zoom pakai
+ * Ctrl/⌘ + scroll (cubit di trackpad juga terbaca sebagai Ctrl + scroll).
+ */
+function zoomPan({ wheelNeedsModifier = false, maxScale = 6 } = {}) {
+    const pointers = new Map();
+    let pinchDistance = 0;
+    let lastPoint = null;
+
+    return {
+        src: '',
+        scale: 1,
+        x: 0,
+        y: 0,
+
+        transform() {
+            return `translate(${this.x}px, ${this.y}px) scale(${this.scale})`;
+        },
+
+        reset() {
+            this.scale = 1;
+            this.x = 0;
+            this.y = 0;
+        },
+
+        /**
+         * Buka layar penuh (dipanggil dari event) dengan gambar dari kotak pratinjau.
+         */
+        show(src) {
+            this.src = src;
+            this.reset();
+            this.$refs.dialog.showModal();
+        },
+
+        /**
+         * Zoom ke arah titik (relatif terhadap tengah area) agar bagian yang dilihat tetap di tempat.
+         */
+        zoomBy(factor, originX = 0, originY = 0) {
+            const nextScale = Math.min(maxScale, Math.max(1, this.scale * factor));
+            const ratio = nextScale / this.scale;
+
+            this.x = originX - (originX - this.x) * ratio;
+            this.y = originY - (originY - this.y) * ratio;
+            this.scale = nextScale;
+            this.clampPan();
+        },
+
+        clampPan() {
+            const image = this.$refs.zoomImage;
+            const stage = this.$refs.stage;
+            const maxX = Math.max(0, (image.offsetWidth * this.scale - stage.clientWidth) / 2);
+            const maxY = Math.max(0, (image.offsetHeight * this.scale - stage.clientHeight) / 2);
+
+            this.x = Math.min(maxX, Math.max(-maxX, this.x));
+            this.y = Math.min(maxY, Math.max(-maxY, this.y));
+        },
+
+        pointFromCenter(clientX, clientY) {
+            const rect = this.$refs.stage.getBoundingClientRect();
+
+            return { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 };
+        },
+
+        onWheel(event) {
+            if (wheelNeedsModifier && !event.ctrlKey && !event.metaKey) {
+                return;
+            }
+
+            event.preventDefault();
+            const point = this.pointFromCenter(event.clientX, event.clientY);
+            this.zoomBy(Math.exp(-event.deltaY * 0.002), point.x, point.y);
+        },
+
+        onDoubleClick(event) {
+            if (this.scale > 1) {
+                this.reset();
+
+                return;
+            }
+
+            const point = this.pointFromCenter(event.clientX, event.clientY);
+            this.zoomBy(2.5, point.x, point.y);
+        },
+
+        onPointerDown(event) {
+            if (event.button !== 0 || event.target.closest('button, a')) {
+                return;
+            }
+
+            this.$refs.stage.setPointerCapture(event.pointerId);
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            lastPoint = { x: event.clientX, y: event.clientY };
+
+            if (pointers.size === 2) {
+                const [first, second] = [...pointers.values()];
+                pinchDistance = Math.hypot(first.x - second.x, first.y - second.y);
+            }
+        },
+
+        onPointerMove(event) {
+            if (!pointers.has(event.pointerId)) {
+                return;
+            }
+
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+            if (pointers.size === 2) {
+                const [first, second] = [...pointers.values()];
+                const distance = Math.hypot(first.x - second.x, first.y - second.y);
+                const middle = this.pointFromCenter((first.x + second.x) / 2, (first.y + second.y) / 2);
+
+                if (pinchDistance > 0) {
+                    this.zoomBy(distance / pinchDistance, middle.x, middle.y);
+                }
+
+                pinchDistance = distance;
+
+                return;
+            }
+
+            if (this.scale > 1 && lastPoint) {
+                this.x += event.clientX - lastPoint.x;
+                this.y += event.clientY - lastPoint.y;
+                this.clampPan();
+            }
+
+            lastPoint = { x: event.clientX, y: event.clientY };
+        },
+
+        onPointerUp(event) {
+            pointers.delete(event.pointerId);
+            pinchDistance = 0;
+            lastPoint = [...pointers.values()][0] ?? null;
+        },
+    };
+}
+
+/**
+ * Field unggah gambar: zoom/geser pratinjau dan hapus foto (bila salah unggah).
+ * Dipakai oleh komponen <x-image-upload zoomable removable>.
+ * - File baru yang belum disimpan: dibatalkan, pratinjau kembali ke foto tersimpan.
+ * - Foto tersimpan: ditandai untuk dihapus (remove_<name>=1) dan baru terhapus saat form disimpan.
+ */
+function imageField({ originalSrc = '' } = {}) {
+    return {
+        ...zoomPan({ wheelNeedsModifier: true }),
+        originalSrc,
+        hasImage: originalSrc !== '',
+        hasNewFile: false,
+        removed: false,
+
+        fileChosen(event) {
+            this.hasNewFile = (event.target.files ?? []).length > 0;
+            this.hasImage = this.hasNewFile || this.originalSrc !== '';
+            this.removed = false;
+            this.reset();
+        },
+
+        removePhoto() {
+            this.reset();
+
+            if (this.hasNewFile) {
+                this.$refs.input.value = '';
+                this.hasNewFile = false;
+                this.$refs.zoomImage.src = this.originalSrc;
+                this.hasImage = this.originalSrc !== '';
+
+                return;
+            }
+
+            this.removed = true;
+        },
+
+        undoRemove() {
+            this.removed = false;
+        },
+    };
+}
+
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('zoomPan', zoomPan);
+    window.Alpine.data('imageField', imageField);
+});
+
+/**
  * Unggah banyak gambar dengan pratinjau. Dipakai oleh komponen <x-multi-image-upload>.
  * Gambar lama tetap di depan (urutan sama), gambar baru ditambahkan di belakang.
  */

@@ -30,7 +30,7 @@
         </label>
     </div>
 
-    <x-date-range label="Periode Program" :start="old('start_date', $program->start_date)" :end="old('end_date', $program->end_date)" hint="Opsional. Klik tanggal mulai, lalu tanggal selesai." />
+    <x-date-range label="Periode Program" :start="old('start_date', $program->start_date)" :end="old('end_date', $program->end_date)" hint="Wajib. Klik tanggal mulai, lalu tanggal selesai (klik tanggal yang sama dua kali untuk satu hari)." />
 
     <div class="grid gap-6 md:grid-cols-2 md:items-start">
         <label class="field">
@@ -42,7 +42,7 @@
             </select>
             @error('status') <span class="field-error">{{ $message }}</span> @enderror
         </label>
-        <x-image-upload name="cover_image" label="Cover" :current="$program->cover_image" />
+        <x-image-upload name="cover_image" label="Cover" :current="$program->cover_image" removable />
     </div>
 
     <div class="rounded-2xl border border-stone-100 bg-stone-50/60 p-5">
@@ -87,10 +87,6 @@
                 @foreach ($errors->get('packages.*') as $messages)
                     <span class="field-error">{{ $messages[0] }}</span>
                 @endforeach
-            </div>
-
-            <div class="md:w-1/2">
-                <x-image-upload name="qris_image" label="QRIS Program" :current="$program->qris_image" fit="contain" />
             </div>
         </div>
     </div>

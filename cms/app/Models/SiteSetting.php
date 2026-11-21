@@ -21,13 +21,15 @@ class SiteSetting extends Model
     /**
      * Nilai awal kontak, dipakai selama admin belum mengisi data di CMS.
      *
-     * @var array{address: string, whatsapp: string, email: string, instagram: string, map_url: ?string}
+     * @var array{address: string, whatsapp: string, email: string, instagram: string, tiktok: ?string, facebook: ?string, map_url: ?string}
      */
     public const CONTACT_DEFAULTS = [
         'address' => 'Jakarta, Indonesia',
         'whatsapp' => '0812-0000-0000',
         'email' => 'halo@pelitabahagia.org',
         'instagram' => 'pelitabahagia',
+        'tiktok' => null,
+        'facebook' => null,
         'map_url' => null,
     ];
 
@@ -39,7 +41,9 @@ class SiteSetting extends Model
     /**
      * Informasi kontak resmi yayasan beserta tautan turunannya.
      *
-     * @return array{address: string, whatsapp: string, email: string, instagram: string, map_url: ?string, whatsapp_url: string, instagram_url: string}
+     * TikTok dan Facebook opsional; tautannya null bila belum diisi.
+     *
+     * @return array{address: string, whatsapp: string, email: string, instagram: string, tiktok: ?string, facebook: ?string, map_url: ?string, whatsapp_url: string, instagram_url: string, tiktok_url: ?string, facebook_url: ?string}
      */
     public static function contact(): array
     {
@@ -58,6 +62,8 @@ class SiteSetting extends Model
         return $contact + [
             'whatsapp_url' => 'https://wa.me/'.preg_replace('/^0/', '62', $whatsappDigits),
             'instagram_url' => 'https://instagram.com/'.$contact['instagram'],
+            'tiktok_url' => $contact['tiktok'] ? 'https://www.tiktok.com/@'.$contact['tiktok'] : null,
+            'facebook_url' => $contact['facebook'],
         ];
     }
 
@@ -109,6 +115,7 @@ class SiteSetting extends Model
     }
 
     public const STRUCTURE_IMAGE_KEY = 'site.structure_image';
+
     public const STRUCTURE_CACHE_KEY = 'site_settings.structure_image';
 
     /**
