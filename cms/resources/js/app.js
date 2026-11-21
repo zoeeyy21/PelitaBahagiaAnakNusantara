@@ -149,12 +149,21 @@ function dateRange({ start = '', end = '', min = '', max = '' } = {}) {
         },
 
         /**
-         * Batasi tanggal yang bisa dipilih (mis. periode program). Tanggal terpilih yang
-         * berada di luar batas digeser ke batas terdekat.
+         * Batasi tanggal yang bisa dipilih (mis. periode program). Bila batas punya tanggal
+         * mulai, rentang terpilih langsung diisi sama dengan batas tersebut; bila tanpa batas
+         * sama sekali, rentang terpilih dikosongkan; selain itu tanggal terpilih yang berada
+         * di luar batas digeser ke batas terdekat.
          */
         setBounds({ min = '', max = '' } = {}) {
             this.min = min || '';
             this.max = max || '';
+
+            if (!this.min && !this.max) {
+                this.clear();
+            } else if (this.min) {
+                this.start = this.min;
+                this.end = this.max;
+            }
 
             const clamp = (date) => {
                 if (!date) {

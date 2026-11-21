@@ -28,7 +28,7 @@
     <input type="hidden" name="{{ $endName }}" x-model="end" value="{{ $toDateString($end) }}">
 
     <div class="relative">
-        <button type="button" x-on:click="toggle()" class="field-input flex items-center gap-3 text-left" :aria-expanded="open">
+        <button type="button" x-on:click="toggle()" class="field-input flex items-center gap-3 border px-3 py-2 text-left leading-6 focus:outline-none" :aria-expanded="open">
             <x-icon name="calendar" class="size-4 text-stone-400" />
             <span class="flex-1 truncate" :class="start ? 'text-stone-900' : 'text-stone-400'" x-text="displayLabel() || @js($placeholder)">{{ $placeholder }}</span>
             <span x-show="start" x-cloak x-on:click.stop="clear()" role="button" aria-label="Hapus tanggal" class="rounded-full p-0.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
