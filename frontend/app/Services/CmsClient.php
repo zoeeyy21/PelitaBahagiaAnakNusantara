@@ -57,8 +57,8 @@ class CmsClient
             return $fallback();
         }
 
-        // Di mode development lokal, gunakan cache sangat singkat (5 detik) agar setiap input baru di CMS langsung tampil
-        $effectiveTtl = config('app.env') === 'local' ? 5 : $ttl;
+        // Durasi cache dapat diatur lewat .env CMS_CACHE_TTL (default 3 detik agar hampir instan dan selalu sinkron)
+        $effectiveTtl = (int) env('CMS_CACHE_TTL', 3);
 
         try {
             return Cache::remember("cms_{$cacheKey}", $effectiveTtl, function () use ($endpoint, $fallback) {
