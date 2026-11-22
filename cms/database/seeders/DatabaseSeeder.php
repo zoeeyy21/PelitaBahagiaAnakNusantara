@@ -6,10 +6,8 @@ use App\Models\Activity;
 use App\Models\GalleryItem;
 use App\Models\ImpactMetric;
 use App\Models\Program;
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,14 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => env('SEED_ADMIN_EMAIL', 'admin@pelitabahagia.test')],
-            [
-                'name' => 'Admin Pelita Bahagia',
-                'password' => Hash::make(env('SEED_ADMIN_PASSWORD', 'password')),
-                'email_verified_at' => now(),
-            ]
-        );
+        $this->call(UserSeeder::class);
 
         $programs = collect([
             [
