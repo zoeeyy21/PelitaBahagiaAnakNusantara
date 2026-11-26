@@ -27,8 +27,6 @@ class PublicApiController extends Controller
     {
         $contact = SiteSetting::contact();
         $metrics = ImpactMetric::query()->where('is_active', true)->orderBy('sort_order')->get();
-        $admin = \App\Models\User::query()->whereNotNull('qris_image')->first() 
-              ?? \App\Models\User::query()->first();
 
         $stats = [
             'children' => 0,
@@ -92,10 +90,7 @@ class PublicApiController extends Controller
             'structure_title' => 'Struktur Yayasan',
             'structure_subtitle' => 'Susunan kepengurusan dan tata kelola Yayasan Pelita Bahagia Anak Nusantara yang berdedikasi melayani dan menjalankan amanah.',
             'structure_caption' => 'Bagan Struktur Kepengurusan & Tata Kelola',
-            'qris_image' => $admin?->qris_image,
-            'bank_name' => $admin?->bank_name,
-            'bank_account_number' => $admin?->bank_account_number,
-            'bank_account_holder' => $admin?->bank_account_holder,
+            ...SiteSetting::bank(),
         ];
 
         return response()->json(['success' => true, 'data' => $data]);
@@ -453,9 +448,6 @@ class PublicApiController extends Controller
 
         $story = array_values(array_unique(array_filter($storyParts)));
 
-        $admin = \App\Models\User::query()->whereNotNull('qris_image')->first() 
-              ?? \App\Models\User::query()->first();
-
         return [
             'id' => $p->id,
             'slug' => $p->slug,
@@ -471,7 +463,7 @@ class PublicApiController extends Controller
             'urgent' => (bool) $p->is_featured,
             'verified' => true,
             'image' => $p->cover_image,
-            'qris_image' => $admin?->qris_image,
+            'qris_image' => SiteSetting::bank()['qris_image'],
             'donation_type' => $donationType,
             'min_donation' => (int) ($p->min_donation_amount ?: 10000),
             'packages' => $packages,

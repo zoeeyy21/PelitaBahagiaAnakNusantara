@@ -141,6 +141,60 @@ class SiteSetting extends Model
         Cache::forget(self::STRUCTURE_CACHE_KEY);
     }
 
+    public const BANK_CACHE_KEY = 'site_settings.bank';
+
+    /**
+     * Field profil bank & QRIS yayasan, disimpan dengan prefix "bank.".
+     *
+     * @var list<string>
+     */
+    public const BANK_FIELDS = ['bank_name', 'bank_account_number', 'bank_account_holder', 'qris_image'];
+
+    /**
+     * Profil bank & QRIS yayasan, sama untuk semua akun admin.
+     *
+     * @return array{bank_name: ?string, bank_account_number: ?string, bank_account_holder: ?string, qris_image: ?string}
+     */
+    public static function bank(): array
+    {
+        $stored = Cache::rememberForever(self::BANK_CACHE_KEY, fn (): array => static::query()
+            ->where('key', 'like', 'bank.%')
+            ->pluck('value', 'key')
+            ->all());
+
+        $bank = [];
+
+        foreach (self::BANK_FIELDS as $field) {
+            $bank[$field] = $stored['bank.'.$field] ?? null;
+        }
+
+        return $bank;
+    }
+
+    /**
+     * Simpan profil bank & QRIS yayasan dan bersihkan cache.
+     *
+     * @param  array<string, ?string>  $bank
+     */
+    public static function updateBank(array $bank): void
+    {
+        foreach (self::BANK_FIELDS as $field) {
+            if (array_key_exists($field, $bank)) {
+                static::updateOrCreate(['key' => 'bank.'.$field], ['value' => $bank[$field]]);
+            }
+        }
+
+        Cache::forget(self::BANK_CACHE_KEY);
+    }
+
+    /**
+     * Profil bank (bank, rekening, pemilik rekening, dan QRIS) yayasan sudah lengkap.
+     */
+    public static function hasCompleteBankProfile(): bool
+    {
+        return collect(self::bank())->every(fn (?string $value): bool => filled($value));
+    }
+
     /**
      * @return list<string>
      */

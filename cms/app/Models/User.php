@@ -20,10 +20,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'bank_name',
-        'bank_account_number',
-        'bank_account_holder',
-        'qris_image',
     ];
 
     /**
@@ -33,17 +29,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-    /**
-     * Profil bank (bank, rekening, pemilik rekening, dan QRIS) sudah lengkap.
-     */
-    public function hasCompletedBankProfile(): bool
-    {
-        return filled($this->bank_name)
-            && filled($this->bank_account_number)
-            && filled($this->bank_account_holder)
-            && filled($this->qris_image);
-    }
 
     /**
      * Get the attributes that should be cast.

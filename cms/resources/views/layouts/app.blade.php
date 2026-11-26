@@ -45,7 +45,7 @@
             </div>
         @endif
 
-        @if (auth()->check() && ! auth()->user()->hasCompletedBankProfile() && ! request()->routeIs('profile'))
+        @if (auth()->check() && ! \App\Models\SiteSetting::hasCompleteBankProfile() && ! request()->routeIs('profile'))
             {{-- Wajib diisi: tidak bisa ditutup (tanpa tombol "Nanti saja" dan Esc dinonaktifkan) --}}
             <dialog id="bank-profile-dialog" aria-labelledby="bank-profile-dialog-title"
                 x-data x-init="$el.showModal()" x-on:cancel.prevent x-on:close="$el.showModal()"

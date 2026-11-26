@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
@@ -22,21 +22,19 @@ new class extends Component
      */
     public function mount(): void
     {
-        $user = Auth::user();
+        $bank = SiteSetting::bank();
 
-        $this->bank_name = (string) $user->bank_name;
-        $this->bank_account_number = (string) $user->bank_account_number;
-        $this->bank_account_holder = (string) $user->bank_account_holder;
-        $this->current_qris_image = $user->qris_image;
+        $this->bank_name = (string) $bank['bank_name'];
+        $this->bank_account_number = (string) $bank['bank_account_number'];
+        $this->bank_account_holder = (string) $bank['bank_account_holder'];
+        $this->current_qris_image = $bank['qris_image'];
     }
 
     /**
-     * Simpan profil bank (bank, rekening, pemilik rekening, dan QRIS) milik admin.
+     * Simpan profil bank (bank, rekening, pemilik rekening, dan QRIS) yayasan, berlaku untuk semua akun.
      */
     public function updateBankInformation(): void
     {
-        $user = Auth::user();
-
         $validated = $this->validate([
             'bank_name' => ['required', 'string', 'max:100'],
             'bank_account_number' => ['required', 'string', 'regex:/^[0-9\-\s]{5,30}$/'],
@@ -53,8 +51,10 @@ new class extends Component
         ]);
 
         if ($this->qris_image) {
-            if ($user->qris_image && ! str_starts_with($user->qris_image, 'http')) {
-                Storage::disk('public')->delete($user->qris_image);
+            $oldQrisImage = SiteSetting::bank()['qris_image'];
+
+            if ($oldQrisImage && ! str_starts_with($oldQrisImage, 'http')) {
+                Storage::disk('public')->delete($oldQrisImage);
             }
 
             $validated['qris_image'] = $this->qris_image->store('qris', 'public');
@@ -63,7 +63,7 @@ new class extends Component
             unset($validated['qris_image']);
         }
 
-        $user->update($validated);
+        SiteSetting::updateBank($validated);
 
         $this->reset('qris_image', 'remove_qris_image');
         $this->qrisInputKey++;
@@ -100,7 +100,7 @@ new class extends Component
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            Rekening dan QRIS yayasan untuk menerima donasi. Wajib diisi lengkap.
+            Rekening dan QRIS yayasan untuk menerima donasi. Data ini sama untuk semua akun admin. Wajib diisi lengkap.
         </p>
     </header>
 
