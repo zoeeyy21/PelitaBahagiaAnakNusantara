@@ -14,7 +14,7 @@ class CmsClient
      */
     public static function apiUrl(): string
     {
-        return rtrim(env('CMS_API_URL', 'http://127.0.0.1:8000/api'), '/');
+        return rtrim((string) config('cms.api_url'), '/');
     }
 
     /**
@@ -31,7 +31,7 @@ class CmsClient
             return $path;
         }
 
-        $baseAsset = rtrim(env('CMS_ASSET_URL', 'http://127.0.0.1:8000/storage'), '/');
+        $baseAsset = rtrim((string) config('cms.asset_url'), '/');
         $cleanPath = ltrim($path, '/');
 
         // Jika diawali "storage/", buang agar tidak double
@@ -40,11 +40,11 @@ class CmsClient
         }
 
         // Cek apakah file fisik ada di public lokal frontend
-        if (file_exists(public_path('storage/' . $cleanPath))) {
-            return asset('storage/' . $cleanPath);
+        if (file_exists(public_path('storage/'.$cleanPath))) {
+            return asset('storage/'.$cleanPath);
         }
 
-        return $baseAsset . '/' . $cleanPath;
+        return $baseAsset.'/'.$cleanPath;
     }
 
     /**
@@ -53,16 +53,16 @@ class CmsClient
     public static function get(string $endpoint, string $cacheKey, callable $fallback, int $ttl = 120): mixed
     {
         // Jika CMS_API_URL dikosongkan secara eksplisit, langsung pakai fallback lokal
-        if (! env('CMS_API_URL') && env('CMS_API_URL') !== null && env('CMS_API_URL') === '') {
+        if (config('cms.api_url') === '') {
             return $fallback();
         }
 
         // Durasi cache dapat diatur lewat .env CMS_CACHE_TTL (default 3 detik agar hampir instan dan selalu sinkron)
-        $effectiveTtl = (int) env('CMS_CACHE_TTL', 3);
+        $effectiveTtl = (int) config('cms.cache_ttl', 3);
 
         try {
             return Cache::remember("cms_{$cacheKey}", $effectiveTtl, function () use ($endpoint, $fallback) {
-                $url = self::apiUrl() . '/' . ltrim($endpoint, '/');
+                $url = self::apiUrl().'/'.ltrim($endpoint, '/');
                 $response = Http::timeout(2.5)->acceptJson()->get($url);
 
                 if ($response->successful()) {
@@ -75,7 +75,8 @@ class CmsClient
                 return $fallback();
             });
         } catch (Throwable $e) {
-            Log::info("CMS API [{$endpoint}] unreachable: " . $e->getMessage() . " — menggunakan fallback lokal.");
+            Log::info("CMS API [{$endpoint}] unreachable: ".$e->getMessage().' — menggunakan fallback lokal.');
+
             return $fallback();
         }
     }
@@ -86,7 +87,7 @@ class CmsClient
     public static function submitDonation(array $payload): array
     {
         try {
-            $url = self::apiUrl() . '/donations';
+            $url = self::apiUrl().'/donations';
             $response = Http::timeout(5)->acceptJson()->post($url, $payload);
 
             if ($response->successful()) {
@@ -99,7 +100,8 @@ class CmsClient
                 'errors' => $response->json('errors') ?? [],
             ];
         } catch (Throwable $e) {
-            Log::warning('Submit donasi ke CMS error: ' . $e->getMessage());
+            Log::warning('Submit donasi ke CMS error: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'message' => 'Layanan CMS sedang tidak dapat dihubungi. Donasi disimpan secara lokal.',
@@ -114,17 +116,16 @@ class CmsClient
     public static function checkDonationStatus(string $referenceCode): ?array
     {
         try {
-            $url = self::apiUrl() . "/donations/{$referenceCode}/status";
+            $url = self::apiUrl()."/donations/{$referenceCode}/status";
             $response = Http::timeout(3)->acceptJson()->get($url);
 
             if ($response->successful()) {
                 return $response->json();
             }
         } catch (Throwable $e) {
-            Log::warning("Cek status donasi {$referenceCode} gagal: " . $e->getMessage());
+            Log::warning("Cek status donasi {$referenceCode} gagal: ".$e->getMessage());
         }
 
         return null;
     }
 }
-
